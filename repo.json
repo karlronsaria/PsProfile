@@ -1,0 +1,17 @@
+{
+    "DefaultRemote": "origin",
+    "DefaultBranch": "master",
+    "Repository": [
+        "PsSchedule",
+        "PsTask",
+        "PsMarkdown"
+    ],
+    "ScriptModule": [
+        "PsSchedule",
+        "PsMarkdown"
+    ],
+    "ElevatedScriptModule": [
+        "PsTask"
+    ]
+}
+
