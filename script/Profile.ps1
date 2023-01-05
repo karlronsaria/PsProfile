@@ -50,23 +50,30 @@ function Run-MyCommand {
 function Get-ScriptModuleSourceCommand {
     Param(
         [String]
-        $InfoDir
+        $InfoDir,
+
+        [String]
+        $StartingDirectory
     )
 
     if (-not $InfoDir) {
         $InfoDir = "$PsScriptRoot\..\res"
     }
 
+    if (-not $StartingDirectory) {
+        $StartingDirectory = "$PsScriptRoot\..\.."
+    }
+
     $command = @"
 `$repo = dir '$InfoDir\repo.json' | cat | ConvertFrom-Json;
 
 foreach (`$module in `$repo.ScriptModule) {
-    iex "$InfoDir\`$module\Get-Scripts.ps1" | % { . `$_ }
+    iex "$StartingDirectory\`$module\Get-Scripts.ps1" | % { . `$_ }
 };
 
 if ((Test-RoleIsAministrator)) {
     foreach (`$module in `$repo.ElevatedScriptModule) {
-        iex "$InfoDir\`$module\Get-Scripts.ps1" | % { . `$_ }
+        iex "$StartingDirectory\`$module\Get-Scripts.ps1" | % { . `$_ }
     }
 };
 "@
