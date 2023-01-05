@@ -1,3 +1,5 @@
+. "$PsScriptRoot\Git.ps1"
+
 <#
 .LINK
 - Url: https://serverfault.com/questions/95431/in-a-powershell-script-how-can-i-check-if-im-running-with-administrator-privil
@@ -14,7 +16,7 @@ function Get-ProfileLocation {
     return Split-Path $PROFILE -Parent
 }
 
-# 2022_02_23
+# karlr (2022_02_23)
 function Get-ConsoleHostHistory {
     Param(
         [Switch]
@@ -52,7 +54,7 @@ function Get-ScriptModuleSourceCommand {
     )
 
     if (-not $InfoDir) {
-        $InfoDir = $PsScriptRoot
+        $InfoDir = "$PsScriptRoot\..\res"
     }
 
     $command = @"
@@ -75,12 +77,3 @@ if ((Test-RoleIsAministrator)) {
 New-Alias `
     -Name 'Pull-ScriptModule' `
     -Value 'Start-ScriptModuleGitPullRequest'
-
-
-
-
-
-
-
-
-

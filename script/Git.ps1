@@ -17,7 +17,7 @@ function Start-GitPullRequest {
 function Start-ScriptModuleGitPullRequest {
     Param(
         [String]
-        $Directory
+        $Directory = "$PsScriptRoot\..\res"
     )
 
     $what = Join-Path $Directory 'repo.json' `
