@@ -17,16 +17,16 @@ function Start-GitPullRequest {
 function Start-ScriptModuleGitPullRequest {
     Param(
         [String]
-        $Directory = "$PsScriptRoot\..\res"
+        $JsonFilePath = "$PsScriptRoot\..\res\repo.json",
+
+        [String]
+        $StartingDirectory = "$PsScriptRoot\.."
     )
 
-    $what = Join-Path $Directory 'repo.json' `
-        | Get-Item `
-        | Get-Content `
-        | ConvertFrom-Json
+    $what = dir $JsonFilePath | cat | ConvertFrom-Json
 
     foreach ($repository in $what.Repository) {
-        $path = Join-Path $Directory $repository
+        $path = Join-Path $StartingDirectory $repository
 
         Start-GitPullRequest `
             -Directory $path `
