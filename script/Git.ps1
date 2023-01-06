@@ -11,7 +11,7 @@ function Start-GitPullRequest {
     )
 
     Set-Location $Directory
-    Invoke-Expression "git pull"
+    Invoke-Expression "git pull $Remote $Branch"
 }
 
 function Start-ScriptModuleGitPullRequest {
@@ -24,6 +24,7 @@ function Start-ScriptModuleGitPullRequest {
     )
 
     $what = dir $JsonFilePath | cat | ConvertFrom-Json
+    $prevDir = Get-Location
 
     foreach ($repository in $what.Repository) {
         $path = Join-Path $StartingDirectory $repository
@@ -33,4 +34,6 @@ function Start-ScriptModuleGitPullRequest {
             -Remote $what.DefaultRemote `
             -Branch $what.DefaultBranch
     }
+
+    $prevDir | Set-Location
 }
