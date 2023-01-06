@@ -20,7 +20,7 @@ function Start-ScriptModuleGitPullRequest {
         $JsonFilePath = "$PsScriptRoot\..\res\repo.json",
 
         [String]
-        $StartingDirectory = "$PsScriptRoot\.."
+        $StartingDirectory = "$PsScriptRoot\..\.."
     )
 
     $what = dir $JsonFilePath | cat | ConvertFrom-Json
