@@ -1,4 +1,4 @@
-function Start-GitPullRequest {
+function Invoke-GitPullRequest {
     Param(
         [String]
         $Directory,
@@ -7,20 +7,32 @@ function Start-GitPullRequest {
         $Remote = 'origin',
 
         [String]
-        $Branch = 'master'
+        $Branch = 'master',
+
+        [Switch]
+        $WhatIf
     )
 
     Set-Location $Directory
-    Invoke-Expression "git pull $Remote $Branch"
+    $cmd = "git pull $Remote $Branch"
+
+    if ($WhatIf) {
+        return $cmd
+    }
+
+    Invoke-Expression $cmd
 }
 
-function Start-ScriptModuleGitPullRequest {
+function Invoke-ScriptModuleGitPullRequest {
     Param(
         [String]
         $JsonFilePath = "$PsScriptRoot\..\res\repo.json",
 
         [String]
-        $StartingDirectory = "$PsScriptRoot\..\.."
+        $StartingDirectory = "$PsScriptRoot\..\..",
+
+        [Switch]
+        $WhatIf
     )
 
     $what = dir $JsonFilePath | cat | ConvertFrom-Json
@@ -29,10 +41,11 @@ function Start-ScriptModuleGitPullRequest {
     foreach ($repository in $what.Repository) {
         $path = Join-Path $StartingDirectory $repository
 
-        Start-GitPullRequest `
+        Invoke-GitPullRequest `
             -Directory $path `
             -Remote $what.DefaultRemote `
-            -Branch $what.DefaultBranch
+            -Branch $what.DefaultBranch `
+            -WhatIf:$WhatIf
     }
 
     $prevDir | Set-Location

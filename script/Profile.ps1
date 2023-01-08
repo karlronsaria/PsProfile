@@ -83,7 +83,7 @@ if ((Test-RoleIsAministrator)) {
 
 New-Alias `
     -Name 'Pull-ScriptModule' `
-    -Value 'Start-ScriptModuleGitPullRequest'
+    -Value 'Invoke-ScriptModuleGitPullRequest'
 
 New-Alias `
     -Name 'Commit-Quick' `
