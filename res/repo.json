@@ -12,6 +12,7 @@
     ],
     "ElevatedScriptModule": [
         "PsTask"
-    ]
+    ],
+    "QuickCommitMessage": "routine commit"
 }
 
