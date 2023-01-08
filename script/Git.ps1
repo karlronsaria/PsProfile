@@ -37,3 +37,29 @@ function Start-ScriptModuleGitPullRequest {
 
     $prevDir | Set-Location
 }
+
+function Invoke-GitQuickCommit {
+    Param(
+        [String]
+        $Message = (cat "$PsScriptRoot\..\res\repo.json" `
+            | ConvertFrom-Json).QuickCommitMessage,
+
+        [Switch]
+        $WhatIf
+    )
+
+    $cmd = "git commit -am `"$Message`""
+
+    if ($WhatIf) {
+        return $cmd
+    }
+
+    Invoke-Expression $cmd
+}
+
+
+
+
+
+
+
