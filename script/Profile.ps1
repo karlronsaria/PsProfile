@@ -89,3 +89,7 @@ New-Alias `
     -Name 'Commit-Quick' `
     -Value 'Invoke-GitQuickCommit'
 
+New-Alias `
+    -Name 'Push-Quick' `
+    -Value 'Invoke-GitQuickPush'
+

@@ -57,7 +57,28 @@ function Invoke-GitQuickCommit {
     Invoke-Expression $cmd
 }
 
+function Invoke-GitQuickPush {
+    Param(
+        [String]
+        $Message = (cat "$PsScriptRoot\..\res\repo.json" `
+            | ConvertFrom-Json).QuickCommitMessage,
 
+        [Switch]
+        $WhatIf
+    )
+
+    Invoke-GitQuickCommit `
+        -Message $Message `
+        -WhatIf:$WhatIf
+
+    $cmd = "git push"
+
+    if ($WhatIf) {
+        return $cmd
+    }
+
+    Invoke-Expression $cmd
+}
 
 
 
