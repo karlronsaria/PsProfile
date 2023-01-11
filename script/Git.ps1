@@ -4,10 +4,12 @@ function Invoke-GitPullRequest {
         $Directory,
 
         [String]
-        $Remote = 'origin',
+        $Remote = (cat "$PsScriptRoot\..\res\repo.json" `
+            | ConvertFrom-Json).DefaultRemote,
 
         [String]
-        $Branch = 'master',
+        $Branch = (cat "$PsScriptRoot\..\res\repo.json" `
+            | ConvertFrom-Json).DefaultBranch,
 
         [Switch]
         $WhatIf
@@ -61,7 +63,7 @@ function Invoke-GitQuickCommit {
         $WhatIf
     )
 
-    $cmd = "git commit -am `"$Message`""
+    $cmd = "git add .; git commit -m `"$Message`""
 
     if ($WhatIf) {
         return $cmd
@@ -91,6 +93,57 @@ function Invoke-GitQuickPush {
     }
 
     Invoke-Expression $cmd
+}
+
+function Invoke-GitQuickMerge {
+    Param(
+        [String]
+        $MasterBranch = (cat "$PsScriptRoot\..\res\repo.json" `
+            | ConvertFrom-Json).DefaultBranch,
+
+        [String]
+        $Remote = (cat "$PsScriptRoot\..\res\repo.json" `
+            | ConvertFrom-Json).DefaultRemote,
+
+        [Switch]
+        $WhatIf
+    )
+
+    $branchInfo = Invoke-Expression "git branch"
+
+    if ($null -eq $branchInfo) {
+        return
+    }
+
+    if (@($branchInfo).Count -gt 1) {
+        $branchInfo = $branchInfo[0]
+    }
+
+    $capture = [Regex]::Match($branchInfo, "(\w|\d)+")
+
+    if (-not $capture.Success) {
+        Write-Output 'Branch name could not be captured'
+        git branch
+        return
+    }
+
+    $currentBranch = $capture.Value
+
+    $cmd = @(
+        "git checkout $MasterBranch"
+        "git pull"
+        "git merge $currentBranch"
+        "git push $Remote $MasterBranch"
+        "git checkout $currentBranch"
+    )
+
+    if ($WhatIf) {
+        return $cmd
+    }
+
+    $cmd | foreach {
+        Invoke-Expression $_
+    }
 }
 
 

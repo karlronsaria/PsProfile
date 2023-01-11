@@ -93,3 +93,7 @@ New-Alias `
     -Name 'Push-Quick' `
     -Value 'Invoke-GitQuickPush'
 
+New-Alias `
+    -Name 'Merge-Quick' `
+    -Value 'Invoke-GitQuickMerge'
+
