@@ -4,11 +4,13 @@
     "Repository": [
         "PsSchedule",
         "PsTask",
-        "PsMarkdown"
+        "PsMarkdown",
+        "PsTool"
     ],
     "ScriptModule": [
         "PsSchedule",
-        "PsMarkdown"
+        "PsMarkdown",
+        "PsTool"
     ],
     "ElevatedScriptModule": [
         "PsTask"
