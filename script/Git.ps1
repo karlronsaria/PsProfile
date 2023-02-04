@@ -116,7 +116,7 @@ function Invoke-GitQuickMerge {
     }
 
     if (@($branchInfo).Count -gt 1) {
-        $branchInfo = $branchInfo[0]
+        $branchInfo = @($branchInfo | where { $_ -match "^\* " })[0]
     }
 
     $capture = [Regex]::Match($branchInfo, "(\w|\d)+")
