@@ -4,11 +4,11 @@ function Invoke-GitPullRequest {
         $Directory,
 
         [String]
-        $Remote = (cat "$PsScriptRoot\..\res\repo.json" `
+        $Remote = (cat "$PsScriptRoot\..\res\repo_setting.json" `
             | ConvertFrom-Json).DefaultRemote,
 
         [String]
-        $Branch = (cat "$PsScriptRoot\..\res\repo.json" `
+        $Branch = (cat "$PsScriptRoot\..\res\repo_setting.json" `
             | ConvertFrom-Json).DefaultBranch,
 
         [Switch]
@@ -28,7 +28,7 @@ function Invoke-GitPullRequest {
 function Invoke-ScriptModuleGitPullRequest {
     Param(
         [String]
-        $JsonFilePath = "$PsScriptRoot\..\res\repo.json",
+        $JsonFilePath = "$PsScriptRoot\..\res\repo_setting.json",
 
         [String]
         $StartingDirectory = "$PsScriptRoot\..\..",
@@ -56,7 +56,7 @@ function Invoke-ScriptModuleGitPullRequest {
 function Invoke-GitQuickCommit {
     Param(
         [String]
-        $Message = (cat "$PsScriptRoot\..\res\repo.json" `
+        $Message = (cat "$PsScriptRoot\..\res\repo_setting.json" `
             | ConvertFrom-Json).QuickCommitMessage,
 
         [Switch]
@@ -75,7 +75,7 @@ function Invoke-GitQuickCommit {
 function Invoke-GitQuickPush {
     Param(
         [String]
-        $Message = (cat "$PsScriptRoot\..\res\repo.json" `
+        $Message = (cat "$PsScriptRoot\..\res\repo_setting.json" `
             | ConvertFrom-Json).QuickCommitMessage,
 
         [Switch]
@@ -98,15 +98,18 @@ function Invoke-GitQuickPush {
 function Invoke-GitQuickMerge {
     Param(
         [String]
-        $MasterBranch = (cat "$PsScriptRoot\..\res\repo.json" `
+        $MasterBranch = (cat "$PsScriptRoot\..\res\repo_setting.json" `
             | ConvertFrom-Json).DefaultBranch,
 
         [String]
-        $Remote = (cat "$PsScriptRoot\..\res\repo.json" `
+        $Remote = (cat "$PsScriptRoot\..\res\repo_setting.json" `
             | ConvertFrom-Json).DefaultRemote,
 
         [Switch]
-        $WhatIf
+        $WhatIf,
+
+        [Switch]
+        $IgnoreLocalGitSettings
     )
 
     $branchInfo = Invoke-Expression "git branch"
@@ -122,18 +125,44 @@ function Invoke-GitQuickMerge {
     $capture = [Regex]::Match($branchInfo, "(\w|\d)+")
 
     if (-not $capture.Success) {
-        Write-Output 'Branch name could not be captured'
+        Write-Output "Branch name could not be captured"
         git branch
         return
     }
 
     $currentBranch = $capture.Value
 
+    $settings = cat "$PsScriptRoot\..\res\repo_setting.json" `
+        | ConvertFrom-Json
+
+    $localFilePath = Join-Path `
+        (Get-Location).Path `
+        $settings.LocalGitSettingsFileName
+
+    $lateralBranches =
+        if (-not $IgnoreLocalGitSetting -and (Test-Path $localFilePath)) {
+            $local = cat $localFilePath | ConvertFrom-Json
+            @($local.Lateral | where { $_ -ne $currentBranch })
+        } else {
+            @()
+        }
+
     $cmd = @(
         "git checkout $MasterBranch"
         "git pull"
         "git merge $currentBranch"
         "git push $Remote $MasterBranch"
+    )
+
+    foreach ($branch in $lateralBranches) {
+        $cmd += @(
+            "git checkout $branch"
+            "git pull $Remote $currentBranch"
+            "git push $Remote $branch"
+        )
+    }
+
+    $cmd += @(
         "git checkout $currentBranch"
     )
 

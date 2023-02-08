@@ -65,7 +65,7 @@ function Get-ScriptModuleSourceCommand {
     }
 
     $command = @"
-`$repo = dir '$InfoDir\repo.json' | cat | ConvertFrom-Json;
+`$repo = dir '$InfoDir\repo_setting.json' | cat | ConvertFrom-Json;
 
 foreach (`$module in `$repo.ScriptModule) {
     iex "$StartingDirectory\`$module\Get-Scripts.ps1" | % { . `$_ }

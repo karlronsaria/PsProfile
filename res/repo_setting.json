@@ -15,6 +15,7 @@
     "ElevatedScriptModule": [
         "PsTask"
     ],
-    "QuickCommitMessage": "routine commit"
+    "QuickCommitMessage": "routine commit",
+    "LocalGitSettingsFileName": "__git.json"
 }
 
