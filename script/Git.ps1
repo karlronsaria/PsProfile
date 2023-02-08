@@ -140,7 +140,7 @@ function Invoke-GitQuickMerge {
         $settings.LocalGitSettingsFileName
 
     $lateralBranches =
-        if (-not $IgnoreLocalGitSetting -and (Test-Path $localFilePath)) {
+        if (-not $IgnoreLocalGitSettings -and (Test-Path $localFilePath)) {
             $local = cat $localFilePath | ConvertFrom-Json
             @($local.Lateral | where { $_ -ne $currentBranch })
         } else {
