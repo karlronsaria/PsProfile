@@ -95,6 +95,44 @@ function Invoke-GitQuickPush {
     Invoke-Expression $cmd
 }
 
+function Get-GitCurrentBranch {
+    $branchInfo = Invoke-Expression "git branch"
+
+    if ($null -eq $branchInfo) {
+        return
+    }
+
+    if (@($branchInfo).Count -gt 1) {
+        $branchInfo = @($branchInfo | where { $_ -match "^\* " })[0]
+    }
+
+    return [Regex]::Match($branchInfo, "(\w|\d)+")
+}
+
+function Get-GitLateralBranches {
+    Param(
+        [Switch]
+        $LocalGitSettings
+    )
+
+    $settings = cat "$PsScriptRoot\..\res\repo_setting.json" `
+        | ConvertFrom-Json
+
+    $localFilePath = Join-Path `
+        (Get-Location).Path `
+        $settings.LocalGitSettingsFileName
+
+    $lateralBranches =
+        if ($LocalGitSettings -and (Test-Path $localFilePath)) {
+            $local = cat $localFilePath | ConvertFrom-Json
+            @($local.Lateral | where { $_ -ne $currentBranch })
+        } else {
+            @()
+        }
+
+    return $lateralBranches
+}
+
 function Invoke-GitQuickMerge {
     Param(
         [String]
@@ -112,17 +150,7 @@ function Invoke-GitQuickMerge {
         $IgnoreLocalGitSettings
     )
 
-    $branchInfo = Invoke-Expression "git branch"
-
-    if ($null -eq $branchInfo) {
-        return
-    }
-
-    if (@($branchInfo).Count -gt 1) {
-        $branchInfo = @($branchInfo | where { $_ -match "^\* " })[0]
-    }
-
-    $capture = [Regex]::Match($branchInfo, "(\w|\d)+")
+    $capture = Get-GitCurrentBranch
 
     if (-not $capture.Success) {
         Write-Output "Branch name could not be captured"
@@ -132,20 +160,8 @@ function Invoke-GitQuickMerge {
 
     $currentBranch = $capture.Value
 
-    $settings = cat "$PsScriptRoot\..\res\repo_setting.json" `
-        | ConvertFrom-Json
-
-    $localFilePath = Join-Path `
-        (Get-Location).Path `
-        $settings.LocalGitSettingsFileName
-
-    $lateralBranches =
-        if (-not $IgnoreLocalGitSettings -and (Test-Path $localFilePath)) {
-            $local = cat $localFilePath | ConvertFrom-Json
-            @($local.Lateral | where { $_ -ne $currentBranch })
-        } else {
-            @()
-        }
+    $lateralBranches = Get-GitLateralBranches
+        -LocalGitSettings:$(-not $IgnoreLocalGitSettings)
 
     $cmd = @(
         "git checkout $MasterBranch"
@@ -175,7 +191,48 @@ function Invoke-GitQuickMerge {
     }
 }
 
+function Invoke-GitLateralPull {
+    Param(
+        [String]
+        $Remote = (cat "$PsScriptRoot\..\res\repo_setting.json" `
+            | ConvertFrom-Json).DefaultRemote,
 
+        [Switch]
+        $WhatIf,
 
+        [Switch]
+        $IgnoreLocalGitSettings
+    )
 
+    $capture = Get-GitCurrentBranch
 
+    if (-not $capture.Success) {
+        Write-Output "Branch name could not be captured"
+        git branch
+        return
+    }
+
+    $currentBranch = $capture.Value
+
+    $lateralBranches = Get-GitLateralBranches
+        -LocalGitSettings:$(-not $IgnoreLocalGitSettings)
+
+    foreach ($branch in $lateralBranches) {
+        $cmd += @(
+            "git checkout $branch"
+            "git pull $Remote $branch"
+        )
+    }
+
+    $cmd += @(
+        "git checkout $currentBranch"
+    )
+
+    if ($WhatIf) {
+        return $cmd
+    }
+
+    $cmd | foreach {
+        Invoke-Expression $_
+    }
+}

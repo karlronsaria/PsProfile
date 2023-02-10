@@ -97,3 +97,7 @@ New-Alias `
     -Name 'Merge-Quick' `
     -Value 'Invoke-GitQuickMerge'
 
+New-Alias `
+    -Name 'Pull-Quick' `
+    -Value 'Invoke-GitLateralPull'
+
