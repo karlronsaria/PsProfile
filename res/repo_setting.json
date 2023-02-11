@@ -16,6 +16,7 @@
         "PsTask"
     ],
     "QuickCommitMessage": "routine commit",
-    "LocalGitSettingsFileName": "__git.json"
+    "LocalGitSettingsFileName": "__git.json",
+    "TempPath": "$env:TEMP"
 }
 

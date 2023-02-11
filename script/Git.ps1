@@ -236,3 +236,103 @@ function Invoke-GitLateralPull {
         Invoke-Expression $_
     }
 }
+
+function Invoke-GitReplaceBranchContent {
+    Param(
+        [String]
+        $Source = (Get-Location).Path,
+
+        [String]
+        $DestinationBranch,
+
+        [String]
+        $Message = (cat "$PsScriptRoot\..\res\repo_setting.json" `
+            | ConvertFrom-Json).QuickCommitMessage,
+
+        [Switch]
+        $WhatIf,
+
+        [Switch]
+        $NoRemoveTemp
+    )
+
+    $capture = Get-GitCurrentBranch
+
+    if (-not $capture.Success) {
+        Write-Output "Branch name could not be captured"
+        git branch
+        return
+    }
+
+    $currentBranch = $capture.Value
+
+    $settings = cat "$PsScriptRoot\..\res\repo_setting.json" `
+        | ConvertFrom-Json
+
+    $temp = $settings.TempPath
+    $temp = iex "& { $temp }"
+
+    $cmd = @()
+
+    if (-not (Test-Path $temp)) {
+        $cmd += @("mkdir $temp -Force")
+    }
+
+    $dateStr = Get-Date -f 'yyyy_MM_dd'
+    $dst = Join-Path $temp $dateStr
+
+    if (-not (Test-Path $dst)) {
+        $cmd += @("mkdir $dst -Force")
+    }
+
+    $dst = Join-Path $dst (Split-Path $Source -Leaf)
+
+    if ((Test-Path $dst)) {
+        $cmd += @("Remove-Item $dst -Recurse -Force")
+    }
+
+    $cmd += @("git clone $Source $dst")
+    $cmd += @("Push-Location $dst")
+    $cmd += @("git checkout $DestinationBranch")
+
+    $cmd += @"
+Get-ChildItem "$Source\*.*" -Recurse ``
+    | ? Name -ne ".git" ``
+    | Remove-Item
+Get-ChildItem $Source -Recurse ``
+    | ? Name -ne ".git" ``
+    | Remove-Item
+Get-ChildItem "$Source\*" -Recurse ``
+    | ? Name -ne ".git" ``
+    | Copy-Item -Destination $dst
+"@
+
+    $cmd += Invoke-GitQuickPush `
+        -Message:$Message `
+        -WhatIf
+
+    $cmd += @("Pop-Location")
+
+    if (-not $NoRemoveTemp) {
+        $cmd += @("Remove-Item $dst -Recurse -Force")
+    }
+
+    if ($WhatIf) {
+        return $cmd
+    }
+
+    $cmd | foreach {
+        Invoke-Expression $_
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
