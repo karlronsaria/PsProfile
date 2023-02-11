@@ -160,7 +160,7 @@ function Invoke-GitQuickMerge {
 
     $currentBranch = $capture.Value
 
-    $lateralBranches = Get-GitLateralBranches
+    $lateralBranches = Get-GitLateralBranches `
         -LocalGitSettings:$(-not $IgnoreLocalGitSettings)
 
     $cmd = @(
@@ -214,7 +214,7 @@ function Invoke-GitLateralPull {
 
     $currentBranch = $capture.Value
 
-    $lateralBranches = Get-GitLateralBranches
+    $lateralBranches = Get-GitLateralBranches `
         -LocalGitSettings:$(-not $IgnoreLocalGitSettings)
 
     foreach ($branch in $lateralBranches) {
