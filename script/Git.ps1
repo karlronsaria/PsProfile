@@ -297,7 +297,9 @@ function Invoke-GitReplaceBranchContent {
         $cmd += @("mkdir $dst -Force")
     }
 
-    $dst = Join-Path $dst (Split-Path $Source -Leaf)
+    $parent = $dst
+    $container = Split-Path $Source -Leaf
+    $dst = Join-Path $dst $container
 
     if ((Test-Path $dst)) {
         $cmd += @("Remove-Item $dst -Recurse -Force")
@@ -308,15 +310,18 @@ function Invoke-GitReplaceBranchContent {
     $cmd += @("git checkout $Branch")
 
     $cmd += @"
-Get-ChildItem "$Source\*.*" -Recurse ``
+Get-ChildItem "$dst\*.*" -Recurse ``
     | ? Name -ne ".git" ``
-    | Remove-Item
-Get-ChildItem $Source -Recurse ``
+    | Remove-Item -Recurse
+Get-ChildItem $dst -Recurse ``
     | ? Name -ne ".git" ``
-    | Remove-Item
-Get-ChildItem "$Source\*" -Recurse ``
+    | Remove-Item -Recurse
+Get-ChildItem $Source ``
     | ? Name -ne ".git" ``
-    | Copy-Item -Destination $dst
+    | Copy-Item ``
+        -Destination $dst ``
+        -Recurse ``
+        -Force
 "@
 
     $cmd += Invoke-GitQuickPush `
