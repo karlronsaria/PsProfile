@@ -242,8 +242,20 @@ function Invoke-GitReplaceBranchContent {
         [String]
         $Source = (Get-Location).Path,
 
+        [ArgumentCompleter({
+            $isGitRepo = git status *>&1 | % { $_ -match "fatal" }
+
+            if (-not $isGitRepo) {
+                return @()
+            }
+
+            return git branch `
+                | foreach {
+                    [Regex]::Match($_, "\S+$").Value
+                }
+        })]
         [String]
-        $DestinationBranch,
+        $Branch,
 
         [String]
         $Message = (cat "$PsScriptRoot\..\res\repo_setting.json" `
@@ -293,7 +305,7 @@ function Invoke-GitReplaceBranchContent {
 
     $cmd += @("git clone $Source $dst")
     $cmd += @("Push-Location $dst")
-    $cmd += @("git checkout $DestinationBranch")
+    $cmd += @("git checkout $Branch")
 
     $cmd += @"
 Get-ChildItem "$Source\*.*" -Recurse ``
