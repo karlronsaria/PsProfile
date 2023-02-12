@@ -239,9 +239,6 @@ function Invoke-GitLateralPull {
 
 function Invoke-GitReplaceBranchContent {
     Param(
-        [String]
-        $Source = (Get-Location).Path,
-
         [ArgumentCompleter({
             $isGitRepo = git status *>&1 | % { $_ -match "fatal" }
 
@@ -256,6 +253,9 @@ function Invoke-GitReplaceBranchContent {
         })]
         [String]
         $Branch,
+
+        [String]
+        $Source = (Get-Location).Path,
 
         [String]
         $Message = (cat "$PsScriptRoot\..\res\repo_setting.json" `
@@ -337,14 +337,3 @@ Get-ChildItem "$Source\*" -Recurse ``
         Invoke-Expression $_
     }
 }
-
-
-
-
-
-
-
-
-
-
-
