@@ -357,11 +357,12 @@ Get-ChildItem $Source ``
         do {
             $confirm = Read-Host $confirmMessage
         }
-        while ($confirm.ToUpper() -notin @('N', 'Y');
+        while ($confirm.ToUpper() -notin @('N', 'Y'));
 
         if ($confirm -eq 'Y') {
             $needConfirm | foreach {
-            Invoke-Expression $_
+                Invoke-Expression $_
+            }
         }
     }
 }
