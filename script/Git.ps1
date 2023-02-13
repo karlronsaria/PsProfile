@@ -265,7 +265,10 @@ function Invoke-GitReplaceBranchContent {
         $WhatIf,
 
         [Switch]
-        $NoRemoveTemp
+        $NoRemoveTemp,
+
+        [Switch]
+        $NoConfirm
     )
 
     $capture = Get-GitCurrentBranch
@@ -324,21 +327,42 @@ Get-ChildItem $Source ``
         -Force
 "@
 
-    $cmd += Invoke-GitQuickPush `
+    $needConfirm += Invoke-GitQuickPush `
         -Message:$Message `
         -WhatIf
 
     $cmd += @("Pop-Location")
 
     if (-not $NoRemoveTemp) {
-        $cmd += @("Remove-Item $dst -Recurse -Force")
+        $needConfirm += @("Remove-Item $dst -Recurse -Force")
     }
 
     if ($WhatIf) {
-        return $cmd
+        return $cmd + $needConfirm
     }
 
     $cmd | foreach {
         Invoke-Expression $_
     }
+
+    if (-not $NoConfirm) {
+        Write-Output "Confirm"
+        Write-Output "Do you want to push changes for branch '$Branch'?"
+
+        $confirmMessage = @"
+[Y] Yes  [N] No
+(default is "Y")
+"@
+
+        do {
+            $confirm = Read-Host $confirmMessage
+        }
+        while ($confirm.ToUpper() -notin @('N', 'Y');
+
+        if ($confirm -eq 'Y') {
+            $needConfirm | foreach {
+            Invoke-Expression $_
+        }
+    }
 }
+
