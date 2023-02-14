@@ -331,14 +331,14 @@ Get-ChildItem $Source ``
         -Message:$Message `
         -WhatIf
 
-    $cmd += @("Pop-Location")
+    $afterConfirm = @("Pop-Location")
 
     if (-not $NoRemoveTemp) {
-        $needConfirm += @("Remove-Item $dst -Recurse -Force")
+        $afterConfirm += @("Remove-Item $dst -Recurse -Force")
     }
 
     if ($WhatIf) {
-        return $cmd + $needConfirm
+        return $cmd + $needConfirm + $afterConfirm
     }
 
     $cmd | foreach {
@@ -346,6 +346,7 @@ Get-ChildItem $Source ``
     }
 
     if (-not $NoConfirm) {
+        Write-Output ""
         Write-Output "Confirm"
         Write-Output "Do you want to push changes for branch '$Branch'?"
 
@@ -363,6 +364,10 @@ Get-ChildItem $Source ``
             $needConfirm | foreach {
                 Invoke-Expression $_
             }
+        }
+
+        $afterConfirm | foreach {
+            Invoke-Expression $_
         }
     }
 }
