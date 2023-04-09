@@ -1,4 +1,3 @@
-. "$PsScriptRoot\Scripts\MyPsShortcut\MyPsShortcut.ps1"
 . "$PsScriptRoot\Scripts\ActionItem.ps1"
 . "$PsScriptRoot\Scripts\PsalmOfTheDay.ps1"
 . "$PsScriptRoot\Scripts\Frivolous.ps1" # Imports Posh-Git module
