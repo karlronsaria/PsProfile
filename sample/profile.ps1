@@ -4,6 +4,11 @@
 
 # First script module
 & "$PsScriptRoot\Scripts\PsProfile\Get-Scripts.ps1" | % { . $_ }
+& "\shortcut\dosscript\ps\ShortcutGoogleChrome\Get-Scripts.ps1" | % { . $_ }
+
+New-Alias `
+    -Name 'gchrome' `
+    -Value 'Run-ShortcutGoogleChromeProfile'
 
 # Store previous command's output in `$__`
 $PSDefaultParameterValues['Out-Default:OutVariable'] = '__'
