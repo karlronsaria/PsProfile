@@ -1,10 +1,8 @@
-. "$PsScriptRoot\Scripts\ActionItem.ps1"
-. "$PsScriptRoot\Scripts\PsalmOfTheDay.ps1"
-. "$PsScriptRoot\Scripts\Frivolous.ps1" # Imports Posh-Git module
+Import-Module Posh-Git
 
-# First script module
 & "$PsScriptRoot\Scripts\PsProfile\Get-Scripts.ps1" | % { . $_ }
 & "\shortcut\dos\ps\ShortcutGoogleChrome\Get-Scripts.ps1" | % { . $_ }
+. "$PsScriptRoot\Scripts\PsFrivolous\script\PsalmOfTheDay.ps1"
 
 New-Alias `
     -Name 'gchrome' `
