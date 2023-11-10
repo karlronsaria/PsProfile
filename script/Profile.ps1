@@ -1,3 +1,5 @@
+#Requires -Module PSReadLine
+
 . "$PsScriptRoot\Git.ps1"
 
 <#
@@ -13,17 +15,81 @@ function Test-RoleIsAministrator {
 }
 
 function Get-ProfileLocation {
-    return Split-Path $PROFILE -Parent
+    [CmdletBinding(DefaultParameterSetName = "ByCurrentApp")]
+    Param(
+        [Parameter(ParameterSetName = "ByDefault")]
+        [Switch]
+        $Default,
+
+        [Parameter(ParameterSetName = "BySelect")]
+        [ArgumentCompleter({
+            $validateSet = @(5, 7)
+            $version = $PsVersionTable.PsVersion.Major
+
+            return @($validateSet | where {
+                $_ -ne $version
+            }) + @($version)
+        })]
+        [ValidateScript({
+            return $_ -in @(0, 5, 7)
+        })]
+        [Int]
+        $Version
+    )
+
+    $Version = switch ($PsCmdlet.ParameterSetName) {
+        "ByCurrentApp" {
+            0
+        }
+
+        "ByDefault" {
+            (cat "$PsScriptRoot/../res/setting.json" |
+                ConvertFrom-Json).ProfileLocation.DefaultVersion
+        }
+
+        "BySelect" {
+            $Version
+        }
+    }
+
+    $apps = @{
+        5 = "powershell"
+        7 = "pwsh"
+    }
+
+    $itemName = switch ($Version) {
+        0 { $PROFILE }
+        default {
+            $app = $apps[$Version]
+            $cmd = { & $app -Command "`$PROFILE" }
+
+            Write-Progress `
+                -Id 1 `
+                -Activity "Running '$app'" `
+                -Status "Please wait..." `
+                -PercentComplete 50
+
+            & $cmd
+
+            Write-Progress `
+                -Id 1 `
+                -Activity "Running command" `
+                -PercentComplete 100 `
+                -Complete
+        }
+    }
+
+    return Split-Path $itemName -Parent
 }
 
-# karlr (2022_02_23)
 function Get-ConsoleHostHistory {
     Param(
         [Switch]
         $FilePath
     )
 
-    $path = "$($env:APPDATA)\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
+    $path =
+    "$($env:APPDATA)\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
 
     if ($FilePath) {
         return $path
