@@ -4,7 +4,7 @@
 
 <#
 .LINK
-- Url: https://serverfault.com/questions/95431/in-a-powershell-script-how-can-i-check-if-im-running-with-administrator-privil
+- Url: <https://serverfault.com/questions/95431/in-a-powershell-script-how-can-i-check-if-im-running-with-administrator-privil>
 - Retrieved: 2023_01_04
 #>
 function Test-RoleIsAministrator {
@@ -44,7 +44,9 @@ function Get-ProfileLocation {
 
         "ByDefault" {
             (cat "$PsScriptRoot/../res/setting.json" |
-                ConvertFrom-Json).ProfileLocation.DefaultVersion
+                ConvertFrom-Json).
+                ProfileLocation.
+                DefaultVersion
         }
 
         "BySelect" {

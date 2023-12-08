@@ -240,16 +240,14 @@ function Invoke-GitLateralPull {
 function Invoke-GitReplaceBranchContent {
     Param(
         [ArgumentCompleter({
-            $isGitRepo = git status *>&1 | % { $_ -match "fatal" }
+            Param($A, $B, $C)
 
-            if (-not $isGitRepo) {
-                return @()
-            }
-
-            return git branch `
-                | foreach {
-                    [Regex]::Match($_, "\S+$").Value
-                }
+            return git status *>&1 |
+                Out-String |
+                where { $_ -notmatch "fatal" } |
+                foreach { git branch } |
+                foreach { [Regex]::Match($_, "\S+$").Value } |
+                where { $_ -like "$C*" }
         })]
         [String]
         $Branch,
@@ -258,8 +256,8 @@ function Invoke-GitReplaceBranchContent {
         $Source = (Get-Location).Path,
 
         [String]
-        $Message = (cat "$PsScriptRoot\..\res\repo_setting.json" `
-            | ConvertFrom-Json).QuickCommitMessage,
+        $Message = (cat "$PsScriptRoot\..\res\repo_setting.json" |
+            ConvertFrom-Json).QuickCommitMessage,
 
         [Switch]
         $WhatIf,
