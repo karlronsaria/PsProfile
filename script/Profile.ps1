@@ -63,7 +63,7 @@ function Get-ProfileLocation {
         0 { $PROFILE }
         default {
             $app = $apps[$Version]
-            $cmd = { & $app -Command "`$PROFILE" }
+            $cmd = { & $app -NoProfile -Command "`$PROFILE" }
 
             Write-Progress `
                 -Id 1 `
