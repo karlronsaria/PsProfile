@@ -121,7 +121,13 @@ function Get-ScriptModuleSourceCommand {
         $InfoDir,
 
         [String]
-        $StartingDirectory
+        $StartingDirectory,
+
+        [Switch]
+        $ShowProgress,
+
+        [Switch]
+        $ShowList
     )
 
     if (-not $InfoDir) {
@@ -132,18 +138,59 @@ function Get-ScriptModuleSourceCommand {
         $StartingDirectory = "$PsScriptRoot\..\.."
     }
 
-    $command = @"
-`$repo = dir '$InfoDir\repo_setting.json' | cat | ConvertFrom-Json;
+    $showItem = if ($ShowList) {
+@"
+    `$item
 
-foreach (`$module in `$repo.ScriptModule) {
-    iex "$StartingDirectory\`$module\Get-Scripts.ps1" | % { . `$_ }
-};
+"@
+    }
+    else {
+        ""
+    }
+
+    $progress = if ($ShowProgress) {
+@"
+$showItem    `$count = `$count + 1
+
+    Write-Progress ``
+        -Activity "Loading script modules" ``
+        -Status (dir `$item).Name ``
+        -PercentComplete (100 * `$count / `$list.Count)
+}
+
+Write-Progress ``
+    -Activity "Loading script modules" ``
+    -PercentComplete 100 ``
+    -Complete
+"@
+    }
+    else {
+@"
+$showItem}
+"@
+    }
+
+    $command =
+@"
+`$repo = dir '$InfoDir\repo.setting.json' |
+    cat |
+    ConvertFrom-Json
+
+`$list = @(foreach (`$module in `$repo.ScriptModule) {
+    iex "$StartingDirectory\`$module\Get-Scripts.ps1"
+})
 
 if ((Test-RoleIsAministrator)) {
-    foreach (`$module in `$repo.ElevatedScriptModule) {
-        iex "$StartingDirectory\`$module\Get-Scripts.ps1" | % { . `$_ }
-    }
-};
+    `$list += @(foreach (`$module in `$repo.ElevatedScriptModule) {
+        iex "$StartingDirectory\`$module\Get-Scripts.ps1"
+    })
+}
+
+`$count = 0
+
+foreach (`$item in `$list) {
+    . `$item
+$progress
 "@
 
     return $command

@@ -1,4 +1,7 @@
-﻿function New-PackageJson {
+﻿<#
+Tags: package json installed powershell module
+#>
+function New-PackageJson {
     Param(
         $Path,
 
@@ -24,7 +27,12 @@
         Write-Output $list
     }
 
-    $list `
+    $obj = [PsCustomObject]@{
+        DateTime = Get-Date
+        Packages = $list
+    }
+
+    $obj `
         | ConvertTo-Json `
         | Out-File (Join-Path $Path "package.json")
 }

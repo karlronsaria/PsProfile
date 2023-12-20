@@ -1,14 +1,54 @@
+function Get-GitPendingRepo {
+    Param(
+        $Path
+    )
+
+    if (-not $Path) {
+        $Path = (Get-Location).Path
+    }
+
+    $ignorePattern = "^__|external|InstalledScriptInfos"
+    $normalStatusPattern = "fatal: not a git repository"
+    $normalStatusCount = 4
+
+    $what =
+@"
+dir $Path ``
+    -Directory |
+where {
+    `$_.Name -notmatch `"$ignorePattern`"
+} |
+foreach {
+    cd `$_.FullName
+
+    [PsCustomObject]@{
+        Name = `$_.Name
+        Status = git status 2>&1
+        Directory = `$_
+    }
+} |
+where {
+    `"`$(`$_.Status)`" -notmatch `"$normalStatusPattern`" -and
+    `$_.Status.Count -notin @($normalStatusCount)
+} |
+ConvertTo-Json
+"@
+
+    powershell -NoProfile -Command $what |
+    ConvertFrom-Json
+}
+
 function Invoke-GitPullRequest {
     Param(
         [String]
         $Directory,
 
         [String]
-        $Remote = (cat "$PsScriptRoot\..\res\repo_setting.json" `
+        $Remote = (cat "$PsScriptRoot\..\res\repo.setting.json" `
             | ConvertFrom-Json).DefaultRemote,
 
         [String]
-        $Branch = (cat "$PsScriptRoot\..\res\repo_setting.json" `
+        $Branch = (cat "$PsScriptRoot\..\res\repo.setting.json" `
             | ConvertFrom-Json).DefaultBranch,
 
         [Switch]
@@ -28,7 +68,7 @@ function Invoke-GitPullRequest {
 function Invoke-ScriptModuleGitPullRequest {
     Param(
         [String]
-        $JsonFilePath = "$PsScriptRoot\..\res\repo_setting.json",
+        $JsonFilePath = "$PsScriptRoot\..\res\repo.setting.json",
 
         [String]
         $StartingDirectory = "$PsScriptRoot\..\..",
@@ -56,7 +96,7 @@ function Invoke-ScriptModuleGitPullRequest {
 function Invoke-GitQuickCommit {
     Param(
         [String]
-        $Message = (cat "$PsScriptRoot\..\res\repo_setting.json" `
+        $Message = (cat "$PsScriptRoot\..\res\repo.setting.json" `
             | ConvertFrom-Json).QuickCommitMessage,
 
         [Switch]
@@ -75,7 +115,7 @@ function Invoke-GitQuickCommit {
 function Invoke-GitQuickPush {
     Param(
         [String]
-        $Message = (cat "$PsScriptRoot\..\res\repo_setting.json" `
+        $Message = (cat "$PsScriptRoot\..\res\repo.setting.json" `
             | ConvertFrom-Json).QuickCommitMessage,
 
         [Switch]
@@ -115,7 +155,7 @@ function Get-GitLateralBranches {
         $LocalGitSettings
     )
 
-    $settings = cat "$PsScriptRoot\..\res\repo_setting.json" `
+    $settings = cat "$PsScriptRoot\..\res\repo.setting.json" `
         | ConvertFrom-Json
 
     $localFilePath = Join-Path `
@@ -136,11 +176,11 @@ function Get-GitLateralBranches {
 function Invoke-GitQuickMerge {
     Param(
         [String]
-        $MasterBranch = (cat "$PsScriptRoot\..\res\repo_setting.json" `
+        $MasterBranch = (cat "$PsScriptRoot\..\res\repo.setting.json" `
             | ConvertFrom-Json).DefaultBranch,
 
         [String]
-        $Remote = (cat "$PsScriptRoot\..\res\repo_setting.json" `
+        $Remote = (cat "$PsScriptRoot\..\res\repo.setting.json" `
             | ConvertFrom-Json).DefaultRemote,
 
         [Switch]
@@ -194,7 +234,7 @@ function Invoke-GitQuickMerge {
 function Invoke-GitLateralPull {
     Param(
         [String]
-        $Remote = (cat "$PsScriptRoot\..\res\repo_setting.json" `
+        $Remote = (cat "$PsScriptRoot\..\res\repo.setting.json" `
             | ConvertFrom-Json).DefaultRemote,
 
         [Switch]
@@ -256,7 +296,7 @@ function Invoke-GitReplaceBranchContent {
         $Source = (Get-Location).Path,
 
         [String]
-        $Message = (cat "$PsScriptRoot\..\res\repo_setting.json" |
+        $Message = (cat "$PsScriptRoot\..\res\repo.setting.json" |
             ConvertFrom-Json).QuickCommitMessage,
 
         [Switch]
@@ -279,7 +319,7 @@ function Invoke-GitReplaceBranchContent {
 
     $currentBranch = $capture.Value
 
-    $settings = cat "$PsScriptRoot\..\res\repo_setting.json" `
+    $settings = cat "$PsScriptRoot\..\res\repo.setting.json" `
         | ConvertFrom-Json
 
     $temp = $settings.TempPath
