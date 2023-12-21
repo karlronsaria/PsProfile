@@ -1,4 +1,8 @@
 ﻿<#
+Requires: PowerShellGet
+- Uses: Get-InstalledModule
+- Retrieved: 2023_12_20
+
 Tags: package json installed powershell module
 #>
 function New-PackageJson {
@@ -13,13 +17,24 @@ function New-PackageJson {
         $Path = "$PsScriptRoot/../res"
     }
 
-    $list = Get-InstalledModule `
-        | select Name, Version, Repository `
-        | foreach {
+    $getModules = if ($null -ne (
+        Get-Command 'Get-InstalledModule' `
+            -ErrorAction 'SilentlyContinue'
+    )) {
+        'Get-Module -ListAvailable'
+    }
+    else {
+        'Get-InstalledModule'
+    }
+
+    $list = iex $getModules |
+        select Name, Version, Repository, ModuleType |
+        foreach {
             [PsCustomObject]@{
                 Name = $_.Name
                 Version = $_.Version.ToString()
                 Repository = $_.Repository
+                ModuleType = $_.ModuleType
             }
         }
 
@@ -40,7 +55,7 @@ function New-PackageJson {
 <#
 .DESCRIPTION
 Requires: PsTool
-- Uses: Unix#Out-FileUnix
+- Uses: Out-FileUnix
 - Retrieved: 2023_12_20
 
 Tags: choco chocolatey local package list json
