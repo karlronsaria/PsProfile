@@ -1,6 +1,9 @@
 function Get-GitPendingRepo {
     Param(
-        $Path
+        $Path,
+
+        [ValidateSet('All', 'OnlyRepo', 'OnlyPendingReview')]
+        $Show = 'OnlyRepo'
     )
 
     if (-not $Path) {
@@ -11,7 +14,7 @@ function Get-GitPendingRepo {
     $normalStatusPattern = "fatal: not a git repository"
     $normalStatusCount = 4
 
-    $what =
+    $command =
 @"
 dir $Path ``
     -Directory |
@@ -34,8 +37,56 @@ where {
 ConvertTo-Json
 "@
 
-    powershell -NoProfile -Command $what |
-    ConvertFrom-Json
+    Write-Progress `
+        -Id 1 `
+        -Activity "Running PowerShell subshell" `
+        -PercentComplete 50 `
+
+    $repoTest = powershell -NoProfile -Command $command |
+        ConvertFrom-Json
+
+    Write-Progress `
+        -Id 1 `
+        -Activity "Running PowerShell subshell" `
+        -Complete
+
+    $repoTest |
+    foreach {
+        $_.Status =
+            if ($null -ne $_.Status.Exception) {
+                'NoRepo'
+            }
+            elseif (@($_.Status)[-1] -match "nothing to commit, working tree clean") {
+                'UpToDate'
+            }
+            else {
+                'PendingReview'
+            }
+    }
+
+    return $(
+        switch ($Show) {
+            'All' {
+                $repoTest
+            }
+
+            'OnlyRepo' {
+                $repoTest |
+                where {
+                    $_.Status -ne 'NoRepo'
+                }
+            }
+
+            'OnlyPendingReview' {
+                $repoTest |
+                where {
+                    $_.Status -eq 'PendingReview'
+                }
+            }
+        }
+    )
+
+    return $repoTest
 }
 
 function Invoke-GitPullRequest {
