@@ -1,3 +1,7 @@
+# todo
+- [ ] PS-version-specific modules
+  - ex: ``MeasureCommand.ps1#function:ConvertFrom-Json``
+
 # I wish
 - [ ] functions in ``Git.ps1`` tested for correctness
   - using
