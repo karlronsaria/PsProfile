@@ -62,6 +62,10 @@ function ConvertFrom-Json {
             -PercentComplete 0
 
         $time = [Diagnostics.Stopwatch]::StartNew()
+        $list = @()
+
+        Write-Host "PsProfile MeasureCommand: ConvertFrom-Json" `
+            -Foreground 'Yellow'
     }
 
     Process
@@ -71,6 +75,8 @@ function ConvertFrom-Json {
         } catch {
             throw
         }
+
+        $list += @($InputObject)
     }
 
     End
@@ -89,10 +95,19 @@ function ConvertFrom-Json {
             -PercentComplete 100 `
             -Complete
 
-        Write-Host "PsProfile MeasureCommand: ConvertFrom-Json" `
-            -Foreground 'Yellow'
+        $maxlen = 75
+        $json = $list -join ' '
+        $json = $json -replace "\s+", " "
+        $len = $json.Length
 
-        Write-Host "  Time: $($time.Elapsed)" `
+        if ($json.Length -gt $maxlen) {
+            $json = "$($json.Substring(0, $maxlen - 4)) ..."
+        }
+
+        Write-Host "  Time: $($time.Elapsed.Milliseconds) ms" `
+            -Foreground 'DarkYellow'
+
+        Write-Host "  Json: $json ($len)" `
             -Foreground 'DarkYellow'
 
         Write-Host "  Number of calls: $global:ConvertFromJson_CallCount" `
