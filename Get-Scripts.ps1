@@ -9,6 +9,6 @@ Retrieved: 2022_10_09
 #>
 
 return `
-    @(dir "$PsScriptRoot\script\*.ps1") +
-    @(dir "$PsScriptRoot\script\$($PsVersionTable.PsVersion.Major)\*.ps1")
+    @(dir "$PsScriptRoot\script\*.ps1" -EA Silent) +
+    @(dir "$PsScriptRoot\script\$($PsVersionTable.PsVersion.Major)\*.ps1" -EA Silent)
 
