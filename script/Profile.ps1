@@ -7,7 +7,7 @@
 - Url: <https://serverfault.com/questions/95431/in-a-powershell-script-how-can-i-check-if-im-running-with-administrator-privil>
 - Retrieved: 2023_01_04
 #>
-function Test-RoleIsAministrator {
+function Test-RoleIsAdministrator {
     $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
     $adminRole = [Security.Principal.WindowsBuiltInRole]::Administrator
     $principal = New-Object Security.Principal.WindowsPrincipal($identity)
@@ -180,7 +180,7 @@ $showItem}
     iex "$StartingDirectory\`$module\Get-Scripts.ps1"
 })
 
-if ((Test-RoleIsAministrator)) {
+if ((Test-RoleIsAdministrator)) {
     `$list += @(foreach (`$module in `$repo.ElevatedScriptModule) {
         iex "$StartingDirectory\`$module\Get-Scripts.ps1"
     })
