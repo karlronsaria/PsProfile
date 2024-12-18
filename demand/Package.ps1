@@ -71,7 +71,7 @@ function New-ChocoLocalPackageList {
     $PassThru
   )
 
-  $dst = (cat "$PsScriptRoot/../res/setting.json" |
+  $dst = (Get-Content "$PsScriptRoot/../res/setting.json" |
     ConvertFrom-Json).
     Package.
     Choco.
@@ -178,7 +178,7 @@ function Install-ChocoLocalPackageList {
     ) -join ""
   }
 
-  $dst = (cat "$PsScriptRoot/../res/setting.json" |
+  $dst = (Get-Content "$PsScriptRoot/../res/setting.json" |
     ConvertFrom-Json).
     Package.
     Choco.
@@ -194,7 +194,7 @@ function Install-ChocoLocalPackageList {
     $FilePath = "$PsScriptRoot/../res/$dst"
   }
 
-  $packages = (cat $FilePath |
+  $packages = (Get-Content $FilePath |
     ConvertFrom-Json).
     Packages
 

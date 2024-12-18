@@ -95,11 +95,11 @@ function Invoke-GitPullRequest {
         $Directory,
 
         [String]
-        $Remote = (cat "$PsScriptRoot\..\res\repo.setting.json" `
+        $Remote = (Get-Content "$PsScriptRoot\..\res\repo.setting.json" `
             | ConvertFrom-Json).DefaultRemote,
 
         [String]
-        $Branch = (cat "$PsScriptRoot\..\res\repo.setting.json" `
+        $Branch = (Get-Content "$PsScriptRoot\..\res\repo.setting.json" `
             | ConvertFrom-Json).DefaultBranch,
 
         [Switch]
@@ -128,7 +128,7 @@ function Invoke-ScriptModuleGitPullRequest {
         $WhatIf
     )
 
-    $what = dir $JsonFilePath | cat | ConvertFrom-Json
+    $what = dir $JsonFilePath | Get-Content | ConvertFrom-Json
     $prevDir = Get-Location
 
     foreach ($repository in $what.Repository) {
@@ -147,7 +147,7 @@ function Invoke-ScriptModuleGitPullRequest {
 function Invoke-GitQuickCommit {
     Param(
         [String]
-        $Message = (cat "$PsScriptRoot\..\res\repo.setting.json" `
+        $Message = (Get-Content "$PsScriptRoot\..\res\repo.setting.json" `
             | ConvertFrom-Json).QuickCommitMessage,
 
         [Switch]
@@ -166,7 +166,7 @@ function Invoke-GitQuickCommit {
 function Invoke-GitQuickPush {
     Param(
         [String]
-        $Message = (cat "$PsScriptRoot\..\res\repo.setting.json" `
+        $Message = (Get-Content "$PsScriptRoot\..\res\repo.setting.json" `
             | ConvertFrom-Json).QuickCommitMessage,
 
         [Switch]
@@ -206,7 +206,7 @@ function Get-GitLateralBranches {
         $LocalGitSettings
     )
 
-    $settings = cat "$PsScriptRoot\..\res\repo.setting.json" `
+    $settings = Get-Content "$PsScriptRoot\..\res\repo.setting.json" `
         | ConvertFrom-Json
 
     $localFilePath = Join-Path `
@@ -215,7 +215,7 @@ function Get-GitLateralBranches {
 
     $lateralBranches =
         if ($LocalGitSettings -and (Test-Path $localFilePath)) {
-            $local = cat $localFilePath | ConvertFrom-Json
+            $local = Get-Content $localFilePath | ConvertFrom-Json
             @($local.Lateral | where { $_ -ne $currentBranch })
         } else {
             @()
@@ -227,11 +227,11 @@ function Get-GitLateralBranches {
 function Invoke-GitQuickMerge {
     Param(
         [String]
-        $MasterBranch = (cat "$PsScriptRoot\..\res\repo.setting.json" `
+        $MasterBranch = (Get-Content "$PsScriptRoot\..\res\repo.setting.json" `
             | ConvertFrom-Json).DefaultBranch,
 
         [String]
-        $Remote = (cat "$PsScriptRoot\..\res\repo.setting.json" `
+        $Remote = (Get-Content "$PsScriptRoot\..\res\repo.setting.json" `
             | ConvertFrom-Json).DefaultRemote,
 
         [Switch]
@@ -285,7 +285,7 @@ function Invoke-GitQuickMerge {
 function Invoke-GitLateralPull {
     Param(
         [String]
-        $Remote = (cat "$PsScriptRoot\..\res\repo.setting.json" `
+        $Remote = (Get-Content "$PsScriptRoot\..\res\repo.setting.json" `
             | ConvertFrom-Json).DefaultRemote,
 
         [Switch]
@@ -347,7 +347,7 @@ function Invoke-GitReplaceBranchContent {
         $Source = (Get-Location).Path,
 
         [String]
-        $Message = (cat "$PsScriptRoot\..\res\repo.setting.json" |
+        $Message = (Get-Content "$PsScriptRoot\..\res\repo.setting.json" |
             ConvertFrom-Json).QuickCommitMessage,
 
         [Switch]
@@ -370,7 +370,7 @@ function Invoke-GitReplaceBranchContent {
 
     $currentBranch = $capture.Value
 
-    $settings = cat "$PsScriptRoot\..\res\repo.setting.json" `
+    $settings = Get-Content "$PsScriptRoot\..\res\repo.setting.json" `
         | ConvertFrom-Json
 
     $temp = $settings.TempPath

@@ -51,7 +51,7 @@ function Get-ProfileLocation {
         }
 
         "ByDefault" {
-            (cat "$PsScriptRoot/../res/setting.json" |
+            (Get-Content "$PsScriptRoot/../res/setting.json" |
                 ConvertFrom-Json).
                 ProfileLocation.
                 DefaultVersion
@@ -105,7 +105,7 @@ function Get-ConsoleHostHistory {
         return $path
     }
 
-    cat $path
+    Get-Content $path
 }
 
 function Run-MyCommand {
@@ -181,7 +181,7 @@ $showItem}
     $command =
 @"
 `$repo = dir '$InfoDir\repo.setting.json' |
-    cat |
+    Get-Content |
     ConvertFrom-Json
 
 `$list = @(foreach (`$module in `$repo.ScriptModule) {
