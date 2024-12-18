@@ -8,10 +8,18 @@
 - Retrieved: 2023_01_04
 #>
 function Test-RoleIsAdministrator {
-    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
-    $adminRole = [Security.Principal.WindowsBuiltInRole]::Administrator
-    $principal = New-Object Security.Principal.WindowsPrincipal($identity)
-    return $principal.IsInRole($adminRole)
+    switch -Regex ($PsVersionTable.Platform) {
+        'Win.*' {
+            $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+            $adminRole = [Security.Principal.WindowsBuiltInRole]::Administrator
+            $principal = New-Object Security.Principal.WindowsPrincipal($identity)
+            return $principal.IsInRole($adminRole)
+        }
+
+        'Unix' {
+            return $(iex "id -u") -eq 0
+        }
+    }
 }
 
 function Get-ProfileLocation {
