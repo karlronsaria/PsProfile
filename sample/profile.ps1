@@ -1,17 +1,3 @@
-# function Import-ModuleWithNotification {
-#     param(
-#         [Parameter(Mandatory=$true, Position=0)]
-#         [string]$Name
-#     )
-#     Write-Host "Importing module: $Name"
-#     Import-Module $Name -Verbose
-# }
-# 
-# # Override the default Import-Module with the verbose notification version
-# Remove-Item alias:Import-Module -Force
-# Set-Alias -Name Import-Module -Value Import-ModuleWithNotification
-
-
 Import-Module Posh-Git
 
 $loc = "$($env:OneDrive)\Documents\WindowsPowerShell"
@@ -26,19 +12,8 @@ $myScriptModules = @(
     "\shortcut\dos\pwsh\ShortcutGoogleChrome\Get-Scripts.ps1"
 )
 
-$myScripts | foreach {
-    . $_
-}
-
-$myScriptModules | foreach {
-    iex $_ | foreach { . $_ }
-}
-
-# Start-ModuleImportProgressRunner
-
-# "$loc\Modules" | dir | foreach { $_.Name } | foreach {
-#     Import-Module $_ -ErrorAction SilentlyContinue
-# }
+$myScripts | foreach { . $_ }
+$myScriptModules | foreach { iex $_ } | foreach { . $_ }
 
 New-Alias `
     -Name 'gchrome' `
@@ -60,9 +35,9 @@ $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
 # link
 # - url: <https://starship.rs/>
 # - retrieved: 2024_09_22
-Invoke-Expression (&starship init powershell)
+Invoke-Expression (& starship init powershell)
 
 Invoke-Expression (Get-ScriptModuleSourceCommand -ShowProgress)
-# Stop-ModuleImportProgressRunner
+Remove-Item -Path function:Get-ScriptModuleSourceCommand
 Set-PsReadLineOption -EditMode Vi
 
