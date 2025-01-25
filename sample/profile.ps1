@@ -7,13 +7,13 @@ $myScripts = @(
     "$loc\Scripts\PsFrivolous\script\PsalmOfTheDay.ps1"
 )
 
-$myScriptModules = @(
+$myModules = @(
     "$loc\Scripts\PsProfile\Get-Scripts.ps1"
     "\shortcut\dos\pwsh\ShortcutGoogleChrome\Get-Scripts.ps1"
 )
 
 $myScripts | foreach { . $_ }
-$myScriptModules | foreach { iex $_ } | foreach { . $_ }
+$myModules | foreach { iex $_ } | foreach { . $_ }
 
 New-Alias `
     -Name 'gchrome' `
@@ -37,7 +37,4 @@ $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
 # - retrieved: 2024_09_22
 Invoke-Expression (& starship init powershell)
 
-Invoke-Expression (Get-ScriptModuleSourceCommand -ShowProgress)
-Remove-Item -Path function:Get-ScriptModuleSourceCommand
 Set-PsReadLineOption -EditMode Vi
-
