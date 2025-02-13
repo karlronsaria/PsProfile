@@ -197,7 +197,7 @@ function Get-GitCurrentBranch {
         $branchInfo = @($branchInfo | where { $_ -match "^\* " })[0]
     }
 
-    return [Regex]::Match($branchInfo, "(\w|\d)+")
+    return [Regex]::Match($branchInfo, "\w+")
 }
 
 function Get-GitLateralBranches {
@@ -382,7 +382,7 @@ function Invoke-GitReplaceBranchContent {
         $cmd += @("mkdir $temp -Force")
     }
 
-    $dateStr = Get-Date -f 'yyyy_MM_dd'
+    $dateStr = Get-Date -f 'yyyy_MM_dd' # Uses DateTimeFormat
     $dst = Join-Path $temp $dateStr
 
     if (-not (Test-Path $dst)) {

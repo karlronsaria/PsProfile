@@ -206,21 +206,36 @@ $progress
 
 New-Alias `
     -Name 'Pull-ScriptModule' `
-    -Value 'Invoke-ScriptModuleGitPullRequest'
+    -Value 'Invoke-ScriptModuleGitPullRequest' `
+    -Scope Global `
+    -Option ReadOnly `
+    -Force
 
 New-Alias `
     -Name 'Commit-Quick' `
-    -Value 'Invoke-GitQuickCommit'
+    -Value 'Invoke-GitQuickCommit' `
+    -Scope Global `
+    -Option ReadOnly `
+    -Force
 
 New-Alias `
     -Name 'Push-Quick' `
-    -Value 'Invoke-GitQuickPush'
+    -Value 'Invoke-GitQuickPush' `
+    -Scope Global `
+    -Option ReadOnly `
+    -Force
 
 New-Alias `
     -Name 'Merge-Quick' `
-    -Value 'Invoke-GitQuickMerge'
+    -Value 'Invoke-GitQuickMerge' `
+    -Scope Global `
+    -Option ReadOnly `
+    -Force
 
 New-Alias `
     -Name 'Pull-Quick' `
-    -Value 'Invoke-GitLateralPull'
+    -Value 'Invoke-GitLateralPull' `
+    -Scope Global `
+    -Option ReadOnly `
+    -Force
 
