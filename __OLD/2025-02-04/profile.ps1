@@ -28,13 +28,13 @@ $PSDefaultParameterValues['Out-Default:OutVariable'] = '__'
 
 # link
 # - url: <https://stackoverflow.com/questions/40098771/changing-powershells-default-output-encoding-to-utf-8>
-# - retrieved: 2023_01_16
+# - retrieved: 2023-01-16
 $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
 
-# (karlr 2024_09_22)
+# (karlr 2024-09-22)
 # link
 # - url: <https://starship.rs/>
-# - retrieved: 2024_09_22
+# - retrieved: 2024-09-22
 Invoke-Expression (& starship init powershell)
 
 Set-PsReadLineOption -EditMode Vi

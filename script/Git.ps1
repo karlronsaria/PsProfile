@@ -382,7 +382,7 @@ function Invoke-GitReplaceBranchContent {
         $cmd += @("mkdir $temp -Force")
     }
 
-    $dateStr = Get-Date -f 'yyyy_MM_dd' # Uses DateTimeFormat
+    $dateStr = Get-Date -f 'yyyy-MM-dd' # Uses DateTimeFormat
     $dst = Join-Path $temp $dateStr
 
     if (-not (Test-Path $dst)) {

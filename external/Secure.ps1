@@ -2,7 +2,7 @@
 .LINK
 Description: ChrisTitusTech powershell-profile
 Url: <https://github.com/ChrisTitusTech/powershell-profile>
-Retrieved: 2025_01_24
+Retrieved: 2025-01-24
 #>
 
 # opt-out of telemetry before doing anything, only if PowerShell is run as admin

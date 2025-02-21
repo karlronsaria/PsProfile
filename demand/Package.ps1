@@ -1,7 +1,7 @@
-﻿<#
+<#
 Requires: PowerShellGet
 - Uses: Get-InstalledModule
-- Retrieved: 2023_12_20
+- Retrieved: 2023-12-20
 
 Tags: package json installed powershell module
 #>
@@ -56,7 +56,7 @@ function New-PackageJson {
 .DESCRIPTION
 Requires: PsTool
 - Uses: Out-FileUnix
-- Retrieved: 2023_12_20
+- Retrieved: 2023-12-20
 
 Tags: choco chocolatey local package list json
 #>

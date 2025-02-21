@@ -1,4 +1,4 @@
-$log = "$PsScriptRoot/log/log_-_$(Get-Date -f yyyy_MM_dd)_profile.log"
+$log = "$PsScriptRoot/log/log_-_$(Get-Date -f yyyy-MM-dd)_profile.log"
 
 filter Get-__CommandLog__ {
     Param(
@@ -43,7 +43,7 @@ $loc = "$($env:OneDrive)\Documents\WindowsPowerShell"
 $myScripts = @(
     "$loc\Scripts\PsFrivolous\script\Draw.ps1"
     "$loc\Scripts\PsFrivolous\script\PsalmOfTheDay.ps1"
-    # # (karlr 2025_01_25)
+    # # (karlr 2025-01-25)
     "$loc\Scripts\PsFrivolous\script\MoonPhase.ps1"
 )
 
@@ -59,11 +59,11 @@ $commands = @(
     # { iex (& { zoxide init powershell | Out-String }) }
     # # link: starship
     # # - url: <https://starship.rs/>
-    # # - retrieved: 2024_09_22
+    # # - retrieved: 2024-09-22
     # { iex (& starship init powershell) }
     # # link: oh-my-posh theme
     # # - url: <https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/cobalt2.omp.json>
-    # # - retrieved: 2025_01_25
+    # # - retrieved: 2025-01-25
     { oh-my-posh init pwsh --config "$loc\Scripts\PsProfile\res\oh-my-posh\cobalt2.omp.json" | iex }
     { $myScripts | foreach { . $_ } }
     { $myScriptModules | foreach { iex $_ } | foreach { . $_ } }
@@ -105,6 +105,6 @@ $PSDefaultParameterValues['Out-Default:OutVariable'] = '__'
 
 # # link
 # # - url: <https://stackoverflow.com/questions/40098771/changing-powershells-default-output-encoding-to-utf-8>
-# # - retrieved: 2023_01_16
+# # - retrieved: 2023-01-16
 $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
 
