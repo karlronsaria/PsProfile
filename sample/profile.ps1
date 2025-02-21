@@ -1,4 +1,4 @@
-$log = "$PsScriptRoot/log/log_-_$(Get-Date -f yyyy-MM-dd)_profile.log"
+$log = "$PsScriptRoot/log/log_-_$(Get-Date -f yyyy-MM-dd)_profile.log" # Uses DateTimeFormat
 
 filter Get-__CommandLog__ {
     Param(
