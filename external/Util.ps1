@@ -8,7 +8,8 @@ Retrieved: 2025-01-24
 # Custom completion for common commands
 Register-ArgumentCompleter `
     -Native `
-    -CommandName git, npm, deno, cargo `
+    -CommandName `
+        git, npm, deno, cargo, netsh `
     -ScriptBlock {
         Param($wordToComplete, $commandAst, $cursorPosition)
 
@@ -20,6 +21,11 @@ Register-ArgumentCompleter `
                 'build', 'check', 'clean', 'doc', 'new', 'init', 'add', 'remove', 'run', 'test', 'bench',
                 'update', 'search', 'publish', 'install', 'uninstall'
             )
+            # (karlr 2025-02-27)
+            'netsh' = @(
+                'wlan', 'show', 'connect', 'disconnect', 'profiles', 'add', 'delete', 'set', 'exec',
+                'trace', 'interface'
+            ) + @($(netsh wlan show profiles | sls "(?<= : ).*$" | what Matches | what Value | foreach { "`"$_`"" }))
         }
 
         $command = $commandAst.CommandElements[0].Value
