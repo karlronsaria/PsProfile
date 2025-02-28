@@ -14,7 +14,9 @@ Register-ArgumentCompleter `
         Param($wordToComplete, $commandAst, $cursorPosition)
 
         $customCompletions = @{
-            'git' = @('status', 'add', 'commit', 'push', 'pull', 'clone', 'checkout')
+            'git' = @(
+                'status', 'add', 'commit', 'push', 'pull', 'clone', 'checkout'
+            )
             'npm' = @('install', 'start', 'run', 'test', 'build')
             'deno' = @('run', 'compile', 'bundle', 'test', 'lint', 'fmt', 'cache', 'info', 'doc', 'upgrade')
             'cargo' = @(
@@ -25,18 +27,66 @@ Register-ArgumentCompleter `
             'netsh' = @(
                 'wlan', 'show', 'connect', 'disconnect', 'profiles', 'add', 'delete', 'set', 'exec',
                 'trace', 'interface'
-            ) + @($(netsh wlan show profiles | sls "(?<= : ).*$" | what Matches | what Value | foreach { "`"$_`"" }))
+            )
         }
 
-        $command = $commandAst.CommandElements[0].Value
+        $elements = $commandAst.CommandElements.Value
+        $command = $elements[0]
+        $suggests = @()
 
-        if ($customCompletions.ContainsKey($command)) {
-            $customCompletions[$command] |
-            Where-Object { $_ -like "$wordToComplete*" } |
+        if (@($elements).Count -gt 1) {
+            $suggests = switch ($command) {
+                'git' {
+                    if ($elements[1] -ne 'checkout') {
+                        break
+                    }
+
+                    git status *>&1 |
+                        Out-String |
+                        where { $_ -notmatch "fatal" } |
+                        foreach { git branch } |
+                        foreach { [Regex]::Match($_, "\S+$").Value } |
+                        foreach { "`"$_`"" }
+
+                    break
+                }
+
+                'netsh' {
+                    if ($elements[1] -ne 'wlan' -or $elements[2] -ne 'connect') {
+                        break
+                    }
+
+                    netsh wlan show profiles |
+                        Select-String "(?<= : ).*$" |
+                        foreach { $_.Matches.Value } |
+                        foreach { "`"$_`"" }
+
+                    break
+                }
+            }
+        }
+
+        if (@($suggests | where { $_ }).Count -eq 0) {
+            $suggests = if ($customCompletions.ContainsKey($command)) {
+                $customCompletions[$command]
+            }
+        }
+
+        $suggests |
+            Where-Object { "$_" -match "^`"?$wordToComplete.*" } |
             ForEach-Object {
                 [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
             }
-        }
+
+        # # (karlr 2025-02-27)
+        #
+        # if ($customCompletions.ContainsKey($command)) {
+        #     $customCompletions[$command] |
+        #     Where-Object { "$_" -match "^`"?$wordToComplete.*" } |
+        #     ForEach-Object {
+        #         [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+        #     }
+        # }
     }
 
 Register-ArgumentCompleter `
