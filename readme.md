@@ -17,4 +17,5 @@
 ---
 
 [Progress Page](./doc/todo.md)
+[Issues Page](./doc/issue.md)
 
