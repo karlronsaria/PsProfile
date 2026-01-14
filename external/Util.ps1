@@ -101,7 +101,7 @@ Register-ArgumentCompleter `
             }
     }
 
-function Move-ItemToRecyleBin {
+function Move-ItemToRecycleBin {
     Param(
         [Parameter(ValueFromPipeline)]
         $Path

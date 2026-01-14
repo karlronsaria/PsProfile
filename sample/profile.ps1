@@ -38,7 +38,9 @@ filter Get-__CommandLog__ {
         Out-File -Path $log -Encoding Ascii -Append -Force
 }
 
-$loc = "$($env:OneDrive)\Documents\WindowsPowerShell"
+# # (karlr 2025-07-09)
+# $loc = "$($env:OneDrive)\Documents\WindowsPowerShell"
+$loc = "${env:SystemDrive}\shortcut\pwsh"
 
 $myScripts = @(
     "$loc\Scripts\PsFrivolous\script\Draw.ps1"
@@ -49,7 +51,8 @@ $myScripts = @(
 
 $myScriptModules = @(
     "$loc\Scripts\PsProfile\Get-Scripts.ps1"
-    "\shortcut\dos\pwsh\ShortcutGoogleChrome\Get-Scripts.ps1"
+    "${env:SystemDrive}\shortcut\dos\pwsh\ShortcutGoogleChrome\Get-Scripts.ps1"
+    "${env:SystemDrive}\shortcut\dos\pwsh\RefactorDateTimeFormat\Get-Scripts.ps1"
 )
 
 $commands = @(
@@ -70,6 +73,21 @@ $commands = @(
     { Get-ScriptModuleSourceCommand -ShowProgress | iex }
 )
 
+# # (karlr 2025-12-02)
+$customModulePath = "$loc\Modules"
+
+if (-not (Test-Path $customModulePath)) {
+    New-Item -ItemType Directory -Path $customModulePath | Out-Null
+}
+
+Invoke-Expression @"
+[Environment]::SetEnvironmentVariable(
+    'PSModulePath',
+    `"$customModulePath;$([Environment]::GetEnvironmentVariable('PSModulePath', 'User'))`",
+    'User'
+)
+"@
+
 $commands | foreach -Begin {
     $count = 0
 } -Process {
@@ -86,7 +104,26 @@ $commands | foreach -Begin {
 Remove-Item -Path function:Get-ScriptModuleSourceCommand
 Remove-Item -Path function:Get-__CommandLog__
 Remove-Variable -Name commands
+Remove-Variable -Name loc
+Remove-Variable -Name customModulePath
+Remove-Variable -Name count
 Set-PsReadLineOption -EditMode Vi
+
+# # (karlr 2026-01-01)
+# # issue 2026-01-01-212506
+# # - description: ``Ctl+w`` puts a "^W" character instead of backward-deleting word
+# # - where: vscode
+# # - howto: ``Ctl+w`` in developer terminal with pwsh
+# # - actual: Puts "^W" at caret
+# # - expected: last word at caret is backward-deleted
+# # - solution
+# #
+# #   PSReadline's Vi Mode uses some of Vi's key bindings.
+# #   It may be Vim-inspired, but it's not a full Vim emulator.
+# #
+# # - alternate: restricts the change to Vi's Insert Mode
+# Set-PSReadLineKeyHandler -Chord Ctrl+w -ViMode Insert -Function BackwardDeleteWord
+Set-PSReadLineKeyHandler -Chord Ctrl+w -Function BackwardDeleteWord
 
 Write-Progress `
     -Activity 'Loading' `

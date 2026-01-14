@@ -204,6 +204,23 @@ $progress
     return $command
 }
 
+function Restart-Host {
+    Param(
+        [Switch]
+        $WhatIf
+    )
+
+    $cmd = @'
+& (Get-Process -Id $PID).Path -NoExit; exit
+'@
+
+    if ($WhatIf) {
+        return $cmd
+    }
+
+    Invoke-Expression $cmd
+}
+
 New-Alias `
     -Name 'Pull-ScriptModule' `
     -Value 'Invoke-ScriptModuleGitPullRequest' `
