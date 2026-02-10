@@ -16,12 +16,12 @@ function Get-GitPendingRepo {
 
     $command =
 @"
-dir $Path ``
+Get-ChildItem $Path ``
     -Directory |
-where {
+Where-Object {
     `$_.Name -notmatch `"$ignorePattern`"
 } |
-foreach {
+ForEach-Object {
     cd `$_.FullName
 
     [PsCustomObject]@{
@@ -30,7 +30,7 @@ foreach {
         Directory = `$_
     }
 } |
-where {
+Where-Object {
     `"`$(`$_.Status)`" -notmatch `"$normalStatusPattern`" -and
     `$_.Status.Count -notin @($normalStatusCount)
 } |
@@ -51,7 +51,7 @@ ConvertTo-Json
         -Complete
 
     $repoTest |
-    foreach {
+    ForEach-Object {
         $_.Status =
             if ($null -ne $_.Status.Exception) {
                 'NoRepo'
@@ -72,14 +72,14 @@ ConvertTo-Json
 
             'OnlyRepo' {
                 $repoTest |
-                where {
+                Where-Object {
                     $_.Status -ne 'NoRepo'
                 }
             }
 
             'OnlyPendingReview' {
                 $repoTest |
-                where {
+                Where-Object {
                     $_.Status -eq 'PendingReview'
                 }
             }
@@ -128,7 +128,7 @@ function Invoke-ScriptModuleGitPullRequest {
         $WhatIf
     )
 
-    $what = dir $JsonFilePath | Get-Content | ConvertFrom-Json
+    $what = $JsonFilePath | Get-Item | Get-Content | ConvertFrom-Json
     $prevDir = Get-Location
 
     foreach ($repository in $what.Repository) {
@@ -194,7 +194,7 @@ function Get-GitCurrentBranch {
     }
 
     if (@($branchInfo).Count -gt 1) {
-        $branchInfo = @($branchInfo | where { $_ -match "^\* " })[0]
+        $branchInfo = @($branchInfo | Where-Object { $_ -match "^\* " })[0]
     }
 
     return [Regex]::Match($branchInfo, "\w+")
@@ -216,7 +216,7 @@ function Get-GitLateralBranches {
     $lateralBranches =
         if ($LocalGitSettings -and (Test-Path $localFilePath)) {
             $local = Get-Content $localFilePath | ConvertFrom-Json
-            @($local.Lateral | where { $_ -ne $currentBranch })
+            @($local.Lateral | Where-Object { $_ -ne $currentBranch })
         } else {
             @()
         }
@@ -277,7 +277,7 @@ function Invoke-GitQuickMerge {
         return $cmd
     }
 
-    $cmd | foreach {
+    $cmd | ForEach-Object {
         Invoke-Expression $_
     }
 }
@@ -323,7 +323,7 @@ function Invoke-GitLateralPull {
         return $cmd
     }
 
-    $cmd | foreach {
+    $cmd | ForEach-Object {
         Invoke-Expression $_
     }
 }
@@ -335,10 +335,10 @@ function Invoke-GitReplaceBranchContent {
 
             return git status *>&1 |
                 Out-String |
-                where { $_ -notmatch "fatal" } |
-                foreach { git branch } |
-                foreach { [Regex]::Match($_, "\S+$").Value } |
-                where { $_ -like "$C*" }
+                Where-Object { $_ -notmatch "fatal" } |
+                ForEach-Object { git branch } |
+                ForEach-Object { [Regex]::Match($_, "\S+$").Value } |
+                Where-Object { $_ -like "$C*" }
         })]
         [String]
         $Branch,
@@ -370,11 +370,11 @@ function Invoke-GitReplaceBranchContent {
 
     $currentBranch = $capture.Value
 
-    $settings = Get-Content "$PsScriptRoot\..\res\repo.setting.json" `
-        | ConvertFrom-Json
+    $settings = Get-Content "$PsScriptRoot\..\res\repo.setting.json" |
+        ConvertFrom-Json
 
     $temp = $settings.TempPath
-    $temp = iex "& { $temp }"
+    $temp = Invoke-Expression "& { $temp }"
 
     $cmd = @()
 
@@ -402,15 +402,15 @@ function Invoke-GitReplaceBranchContent {
     $cmd += @("git checkout $Branch")
 
     $cmd += @"
-Get-ChildItem "$dst\*.*" -Recurse ``
-    | ? Name -ne ".git" ``
-    | Remove-Item -Recurse
-Get-ChildItem $dst -Recurse ``
-    | ? Name -ne ".git" ``
-    | Remove-Item -Recurse
-Get-ChildItem $Source ``
-    | ? Name -ne ".git" ``
-    | Copy-Item ``
+Get-ChildItem "$dst\*.*" -Recurse |
+    Where-Object Name -ne ".git" |
+    Remove-Item -Recurse
+Get-ChildItem $dst -Recurse |
+    Where-Object Name -ne ".git" |
+    Remove-Item -Recurse
+Get-ChildItem $Source |
+    Where-Object Name -ne ".git" |
+    Copy-Item ``
         -Destination $dst ``
         -Recurse ``
         -Force
@@ -430,7 +430,7 @@ Get-ChildItem $Source ``
         return $cmd + $needConfirm + $afterConfirm
     }
 
-    $cmd | foreach {
+    $cmd | ForEach-Object {
         Invoke-Expression $_
     }
 
@@ -450,12 +450,12 @@ Get-ChildItem $Source ``
         while ($confirm.ToUpper() -notin @('N', 'Y'));
 
         if ($confirm -eq 'Y') {
-            $needConfirm | foreach {
+            $needConfirm | ForEach-Object {
                 Invoke-Expression $_
             }
         }
 
-        $afterConfirm | foreach {
+        $afterConfirm | ForEach-Object {
             Invoke-Expression $_
         }
     }

@@ -1,29 +1,31 @@
-# powershell completion for today                                -*- shell-script -*-
-
-function __today_debug {
-    if ($env:BASH_COMP_DEBUG_FILE) {
-        "$args" | Out-File -Append -FilePath "$env:BASH_COMP_DEBUG_FILE"
-    }
-}
-
-filter __today_escapeStringWithSpecialChars {
-    $_ -replace '\s|#|@|\$|;|,|''|\{|\}|\(|\)|"|`|\||<|>|&','`$&'
-}
-
-[scriptblock]${__todayCompleterBlock} = {
+# powershell completion for 'today.exe'
+Register-ArgumentCompleter `
+    -CommandName 'today' `
+    -ScriptBlock `
+{
     param(
-            $WordToComplete,
-            $CommandAst,
-            $CursorPosition
-        )
+        $WordToComplete,
+        $CommandAst,
+        $CursorPosition
+    )
+
+    function __debug__ {
+        if ($env:BASH_COMP_DEBUG_FILE) {
+            "$args" | Out-File -Append -FilePath "$env:BASH_COMP_DEBUG_FILE"
+        }
+    }
+
+    filter __escapeStringWithSpecialChars__ {
+        $_ -replace '\s|#|@|\$|;|,|''|\{|\}|\(|\)|"|`|\||<|>|&','`$&'
+    }
 
     # Get the current command line and convert into a string
     $Command = $CommandAst.CommandElements
     $Command = "$Command"
 
-    __today_debug ""
-    __today_debug "========= starting completion logic =========="
-    __today_debug "WordToComplete: $WordToComplete Command: $Command CursorPosition: $CursorPosition"
+    __debug__ ""
+    __debug__ "========= starting completion logic =========="
+    __debug__ "WordToComplete: $WordToComplete Command: $Command CursorPosition: $CursorPosition"
 
     # The user could have moved the cursor backwards on the command-line.
     # We need to trigger completion from the $CursorPosition location, so we need
@@ -33,7 +35,7 @@ filter __today_escapeStringWithSpecialChars {
     if ($Command.Length -gt $CursorPosition) {
         $Command=$Command.Substring(0,$CursorPosition)
     }
-    __today_debug "Truncated command: $Command"
+    __debug__ "Truncated command: $Command"
 
     $ShellCompDirectiveError=1
     $ShellCompDirectiveNoSpace=2
@@ -46,8 +48,8 @@ filter __today_escapeStringWithSpecialChars {
     # Split the command at the first space to separate the program and arguments.
     $Program,$Arguments = $Command.Split(" ",2)
 
-    $RequestComp="$Program __complete $Arguments"
-    __today_debug "RequestComp: $RequestComp"
+    $RequestComp = "$Program __complete $Arguments"
+    __debug__ "RequestComp: $RequestComp"
 
     # we cannot use $WordToComplete because it
     # has the wrong values if the cursor was moved
@@ -55,21 +57,21 @@ filter __today_escapeStringWithSpecialChars {
     if ($WordToComplete -ne "" ) {
         $WordToComplete = $Arguments.Split(" ")[-1]
     }
-    __today_debug "New WordToComplete: $WordToComplete"
-
+    __debug__ "New WordToComplete: $WordToComplete"
 
     # Check for flag with equal sign
-    $IsEqualFlag = ($WordToComplete -Like "--*=*" )
-    if ( $IsEqualFlag ) {
-        __today_debug "Completing equal sign flag"
+    $IsEqualFlag = $WordToComplete -Like "--*=*"
+
+    if ($IsEqualFlag) {
+        __debug__ "Completing equal sign flag"
         # Remove the flag part
-        $Flag,$WordToComplete = $WordToComplete.Split("=",2)
+        $Flag, $WordToComplete = $WordToComplete.Split("=", 2)
     }
 
     if ( $WordToComplete -eq "" -And ( -Not $IsEqualFlag )) {
         # If the last parameter is complete (there is a space following it)
         # We add an extra empty parameter so we can indicate this to the go method.
-        __today_debug "Adding extra empty parameter"
+        __debug__ "Adding extra empty parameter"
         # PowerShell 7.2+ changed the way how the arguments are passed to executables,
         # so for pre-7.2 or when Legacy argument passing is enabled we need to use
         # `"`" to pass an empty argument, a "" or '' does not work!!!
@@ -83,7 +85,7 @@ filter __today_escapeStringWithSpecialChars {
         }
     }
 
-    __today_debug "Calling $RequestComp"
+    __debug__ "Calling $RequestComp"
     # First disable ActiveHelp which is not supported for Powershell
     ${env:TODAY_ACTIVE_HELP}=0
 
@@ -97,15 +99,15 @@ filter __today_escapeStringWithSpecialChars {
         # There is no directive specified
         $Directive = 0
     }
-    __today_debug "The completion directive is: $Directive"
+    __debug__ "The completion directive is: $Directive"
 
     # remove directive (last element) from out
     $Out = $Out | Where-Object { $_ -ne $Out[-1] }
-    __today_debug "The completions are: $Out"
+    __debug__ "The completions are: $Out"
 
     if (($Directive -band $ShellCompDirectiveError) -ne 0 ) {
         # Error code.  No completion.
-        __today_debug "Received error from custom completion go code"
+        __debug__ "Received error from custom completion go code"
         return
     }
 
@@ -113,7 +115,7 @@ filter __today_escapeStringWithSpecialChars {
     [Array]$Values = $Out | ForEach-Object {
         #Split the output in name and description
         $Name, $Description = $_.Split("`t",2)
-        __today_debug "Name: $Name Description: $Description"
+        __debug__ "Name: $Name Description: $Description"
 
         # Look for the longest completion so that we can format things nicely
         if ($Longest -lt $Name.Length) {
@@ -128,17 +130,16 @@ filter __today_escapeStringWithSpecialChars {
         @{Name="$Name";Description="$Description"}
     }
 
-
     $Space = " "
     if (($Directive -band $ShellCompDirectiveNoSpace) -ne 0 ) {
         # remove the space here
-        __today_debug "ShellCompDirectiveNoSpace is called"
+        __debug__ "ShellCompDirectiveNoSpace is called"
         $Space = ""
     }
 
     if ((($Directive -band $ShellCompDirectiveFilterFileExt) -ne 0 ) -or
        (($Directive -band $ShellCompDirectiveFilterDirs) -ne 0 ))  {
-        __today_debug "ShellCompDirectiveFilterFileExt ShellCompDirectiveFilterDirs are not supported"
+        __debug__ "ShellCompDirectiveFilterFileExt ShellCompDirectiveFilterDirs are not supported"
 
         # return here to prevent the completion of the extensions
         return
@@ -150,7 +151,7 @@ filter __today_escapeStringWithSpecialChars {
 
         # Join the flag back if we have an equal sign flag
         if ( $IsEqualFlag ) {
-            __today_debug "Join the equal sign flag back to the completion value"
+            __debug__ "Join the equal sign flag back to the completion value"
             $_.Name = $Flag + "=" + $_.Name
         }
     }
@@ -161,7 +162,7 @@ filter __today_escapeStringWithSpecialChars {
     }
 
     if (($Directive -band $ShellCompDirectiveNoFileComp) -ne 0 ) {
-        __today_debug "ShellCompDirectiveNoFileComp is called"
+        __debug__ "ShellCompDirectiveNoFileComp is called"
 
         if ($Values.Length -eq 0) {
             # Just print an empty string here so the
@@ -174,11 +175,13 @@ filter __today_escapeStringWithSpecialChars {
     }
 
     # Get the current mode
-    $Mode = (Get-PSReadLineKeyHandler | Where-Object {$_.Key -eq "Tab" }).Function
-    __today_debug "Mode: $Mode"
+    $Mode = Get-PSReadLineKeyHandler |
+        Where-Object Key -eq "Tab" |
+        ForEach-Object Function
+
+    __debug__ "Mode: $Mode"
 
     $Values | ForEach-Object {
-
         # store temporary because switch will overwrite $_
         $comp = $_
 
@@ -195,15 +198,18 @@ filter __today_escapeStringWithSpecialChars {
         # 4) ToolTip        text for the tooltip with details about the object
 
         switch ($Mode) {
-
-            # bash like
+            # bash-like
             "Complete" {
-
                 if ($Values.Length -eq 1) {
-                    __today_debug "Only one completion left"
+                    __debug__ "Only one completion left"
 
                     # insert space after value
-                    [System.Management.Automation.CompletionResult]::new($($comp.Name | __today_escapeStringWithSpecialChars) + $Space, "$($comp.Name)", 'ParameterValue', "$($comp.Description)")
+                    [System.Management.Automation.CompletionResult]::new(
+                        $($comp.Name | __escapeStringWithSpecialChars__) + $Space,
+                        "$($comp.Name)",
+                        'ParameterValue',
+                        "$($comp.Description)"
+                    )
 
                 } else {
                     # Add the proper number of spaces to align the descriptions
@@ -218,29 +224,41 @@ filter __today_escapeStringWithSpecialChars {
                         $Description = "  ($($comp.Description))"
                     }
 
-                    [System.Management.Automation.CompletionResult]::new("$($comp.Name)$Description", "$($comp.Name)$Description", 'ParameterValue', "$($comp.Description)")
+                    [System.Management.Automation.CompletionResult]::new(
+                        "$($comp.Name)$Description",
+                        "$($comp.Name)$Description",
+                        'ParameterValue',
+                        "$($comp.Description)"
+                    )
                 }
-             }
+            }
 
-            # zsh like
+            # zsh-like
             "MenuComplete" {
                 # insert space after value
                 # MenuComplete will automatically show the ToolTip of
                 # the highlighted value at the bottom of the suggestions.
-                [System.Management.Automation.CompletionResult]::new($($comp.Name | __today_escapeStringWithSpecialChars) + $Space, "$($comp.Name)", 'ParameterValue', "$($comp.Description)")
+                [System.Management.Automation.CompletionResult]::new(
+                    $($comp.Name | __escapeStringWithSpecialChars__) + $Space,
+                    "$($comp.Name)",
+                    'ParameterValue',
+                    "$($comp.Description)"
+                )
             }
 
             # TabCompleteNext and in case we get something unknown
-            Default {
+            default {
                 # Like MenuComplete but we don't want to add a space here because
                 # the user need to press space anyway to get the completion.
                 # Description will not be shown because that's not possible with TabCompleteNext
-                [System.Management.Automation.CompletionResult]::new($($comp.Name | __today_escapeStringWithSpecialChars), "$($comp.Name)", 'ParameterValue', "$($comp.Description)")
+                [System.Management.Automation.CompletionResult]::new(
+                    $($comp.Name | __escapeStringWithSpecialChars__),
+                    "$($comp.Name)",
+                    'ParameterValue',
+                    "$($comp.Description)"
+                )
             }
         }
 
     }
 }
-
-Register-ArgumentCompleter -CommandName 'today' -ScriptBlock ${__todayCompleterBlock}
-

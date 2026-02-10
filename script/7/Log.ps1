@@ -195,8 +195,9 @@ function Invoke-WebRequest {
         try {
             $line = "[$(get-date -Format "yyyy-MM-dd HH:mm:ss")] ${env:ComputerName}/${env:UserName}: Invoke-WebRequest"
 
+            # Uses DateTimeFormat
             $line | Out-File `
-                -FilePath "$logPath/$(Get-Date -Format "yyyy-MM-dd").log" ` # Uses DateTimeFormat
+                -FilePath "$logPath/$(Get-Date -Format "yyyy-MM-dd").log" `
                 -Append
 
             $steppablePipeline.Process($_)
