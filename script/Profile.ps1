@@ -158,15 +158,20 @@ function Get-ScriptModuleSourceCommand {
 
     $progress = if ($ShowProgress) {
 @"
+{
 $showItem    `$count = `$count + 1
 
     Write-Progress ``
+        -Id 2 ``
         -Activity "Loading script modules" ``
         -Status (dir `$item).Name ``
         -PercentComplete (100 * `$count / `$list.Count)
+
+    . `$item
 }
 
 Write-Progress ``
+    -Id 2 ``
     -Activity "Loading script modules" ``
     -PercentComplete 100 ``
     -Complete
@@ -196,8 +201,7 @@ if ((Test-RoleIsAdministrator)) {
 
 `$count = 0
 
-foreach (`$item in `$list) {
-    . `$item
+foreach (`$item in `$list)
 $progress
 "@
 

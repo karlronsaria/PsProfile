@@ -43,14 +43,14 @@ Register-ArgumentCompleter `
             "-h",
             "--help"
         )
-        
+
         $whenPrint = @(
             "-print-settings",
             "-silent",
             "-print-dialog",
             "-exit-when-done"
         )
-        
+
         $views = @(
             "single page",
             "continuous single page",
@@ -59,7 +59,7 @@ Register-ArgumentCompleter `
             "book view",
             "continuous book view"
         )
-        
+
         $printSetting = @(
             "even",
             "odd",
@@ -87,18 +87,18 @@ Register-ArgumentCompleter `
         )
 
         $commands = $commandAst.CommandElements.Extent.Text
-        
+
         $all = $options | Where-Object {
             $_ -notin $commands
         }
-        
+
         if (@($commands) -contains '-print-default' -or @($commands) -contains '-print-to') {
             $all += @($whenPrint)
         }
-        
+
         if (@($commands).Count -gt 1) {
             $command = $commands[-1]
-            
+
             switch ($command) {
                 '-page' {
                     return '1'
@@ -107,7 +107,7 @@ Register-ArgumentCompleter `
                 '-appdata' {
                     return (Get-ChildItem)
                 }
-                
+
                 '-named-dest' {
                     return (Get-ChildItem)
                 }
@@ -125,7 +125,7 @@ Register-ArgumentCompleter `
                         }
                     )
                 }
-                
+
                 '-zoom' {
                     return $(
                         0 .. 10 | ForEach-Object { 10 * $_ }
@@ -133,19 +133,19 @@ Register-ArgumentCompleter `
                         @("`"fit page`"", "`"fit width`"", "`"fit content`"")
                     )
                 }
-                
+
                 '-scroll' {
                     return "0,0"
                 }
-                
+
                 '-search' {
                     return (Get-ChildItem)
                 }
-                
+
                 '-dde' {
                     return "'[]'"
                 }
-                
+
                 '-print-to' {
                     return $(
                         wmic printer get Name |
@@ -154,11 +154,11 @@ Register-ArgumentCompleter `
                             ForEach-Object { "`"$($_.Trim())`"" }
                     )
                 }
-                
+
                 '-print-settings' {
                     return "`"`""
                 }
-                
+
                 '-stress-test' {
                     return (Get-ChildItem)
                 }
@@ -168,7 +168,7 @@ Register-ArgumentCompleter `
                 }
             }
         }
-        
+
         if ($wordToComplete -like "-*") {
             return @(
                 $all |
@@ -201,7 +201,7 @@ Register-ArgumentCompleter `
                 -Completed |
                 Out-Null
         )
-        
+
         if (@($suggests | Where-Object { $_ }).Count -eq 0) {
             $suggests = if ($customCompletions.ContainsKey($command)) {
                 $customCompletions[$command]

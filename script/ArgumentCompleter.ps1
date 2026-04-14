@@ -12,7 +12,7 @@ Register-ArgumentCompleter `
         git, npm, deno, cargo, netsh, vera `
     -ScriptBlock {
         Param($wordToComplete, $commandAst, $cursorPosition)
-        
+
         $customCompletions = @{
             # (karlr 2026-01-23)
             'git' = @(
