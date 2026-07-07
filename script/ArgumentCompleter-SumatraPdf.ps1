@@ -188,7 +188,7 @@ Register-ArgumentCompleter `
             Get-ChildItem /lit/*.pdf, /doc/*.pdf, /note/*.pdf -Recurse |
             ForEach-Object FullName |
             ForEach-Object {
-                if ($_ -like "* *") {
+                if ($_ -match " |\(|\)") {
                     "`"$_`""
                 }
                 else {

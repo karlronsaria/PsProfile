@@ -7,7 +7,8 @@ Register-ArgumentCompleter `
 
         $commands = $commandAst.CommandElements.Extent.Text
 
-        $help = dir "$PsScriptRoot/../res/yt-dlp.man" |
+        $help = "$PsScriptRoot/../res/yt-dlp.man" |
+            Get-Item |
             Get-Content |
             Where-Object { $_ -notlike "#*" } |
             Select-String "(?<=^\s{4})-((\S+ )+(?= )|(\S+ )*(\S+$))" |
@@ -18,7 +19,7 @@ Register-ArgumentCompleter `
                 $count = @($split).Count
                 $params = @($split)[-1].Split(' ').Trim()
                 $long = @($params)[0]
-                $params = @(@($params) | select -Skip 1)
+                $params = @(@($params) | Select-Object -Skip 1)
 
                 [pscustomobject]@{
                     Short = if ($count -eq 1) { $null } else { @($split)[0] }
@@ -29,7 +30,7 @@ Register-ArgumentCompleter `
 
         if ($wordToComplete -like "-*") {
             return (@($help.Long) + @($help.Short)) |
-                where {
+                Where-Object {
                     $_ -like "$wordToComplete*"
                 }
         }

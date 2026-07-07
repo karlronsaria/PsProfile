@@ -1,11 +1,12 @@
 #Requires -Module PSReadLine
 
-. "$PsScriptRoot\Git.ps1"
+. "$PsScriptRoot/Git.ps1"
 
 <#
 .LINK
-- Url: <https://serverfault.com/questions/95431/in-a-powershell-script-how-can-i-check-if-im-running-with-administrator-privil>
-- Retrieved: 2023-01-04
+* howto
+  - Url: <https://serverfault.com/questions/95431/in-a-powershell-script-how-can-i-check-if-im-running-with-administrator-privil>
+  - Retrieved: 2023-01-04
 #>
 function Test-RoleIsAdministrator {
     switch -Regex ($PsVersionTable.Platform) {
@@ -17,7 +18,7 @@ function Test-RoleIsAdministrator {
         }
 
         'Unix' {
-            return $(iex "id -u") -eq 0
+            return $(Invoke-Expression "id -u") -eq 0
         }
     }
 }
@@ -31,12 +32,12 @@ function Get-ProfileLocation {
 
         [Parameter(ParameterSetName = "BySelect")]
         [ArgumentCompleter({
-            $validateSet = @(5, 7)
-            $version = $PsVersionTable.PsVersion.Major
+            $possibleVersions = @(5, 7)
+            $currentVersion = $PsVersionTable.PsVersion.Major
 
-            return @($validateSet | where {
-                $_ -ne $version
-            }) + @($version)
+            return @($possibleVersions | Where-Object {
+                $_ -ne $currentVersion
+            }) + @($currentVersion)
         })]
         [ValidateScript({
             return $_ -in @(0, 5, 7)
@@ -108,7 +109,7 @@ function Get-ConsoleHostHistory {
     Get-Content $path
 }
 
-function Run-MyCommand {
+function Start-MyCommand {
     Param(
         [Parameter(ValueFromPipeline = $true)]
         [String]
