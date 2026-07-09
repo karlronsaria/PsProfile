@@ -145,3 +145,26 @@ $PSDefaultParameterValues['Out-Default:OutVariable'] = '__'
 # # - retrieved: 2023-01-16
 $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
 
+# # link
+# # - url
+# #   - <https://www.youtube.com/watch?v=z3NpVq-y6jU>
+# #   - <https://en.wikipedia.org/wiki/Code_page>
+# # - retrieved: 2026-07-09
+[Console]::InputEncoding = [System.Text.Encoding]::UTF8
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+chcp 65001 > $null
+
+# # link
+# # - url
+# #   - <https://github.com/SleepyCatHey/Ultimate-Win11-Setup/blob/main/PowerShell/Microsoft.PowerShell_profile.ps1>
+# #   - <https://www.youtube.com/watch?v=z3NpVq-y6jU>
+# # - retrieved: 2026-07-09
+if (Get-Command fastfetch -ErrorAction SilentlyContinue) {
+    "/shortcut/pwsh/Scripts/PsProfile/res/fastfetch/config.jsonc" |
+    ForEach-Object {
+        if (Test-Path $_) {
+            fastfetch -c $_
+        }
+    }
+}
